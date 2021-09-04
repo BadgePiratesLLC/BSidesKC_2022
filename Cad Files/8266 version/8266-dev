@@ -1,0 +1,37 @@
+Source,C:\Users\burns\Documents\KiCAD\8266-dev\8266-dev.sch
+Kicad Rev,Eeschema (5.1.2)-1
+Generated Date,9/9/2019 9:09:00 PM
+
+Title,Not Set
+Company,Not Set
+Revision,Not Set
+Date Issue,Not Set
+
+Reference,Value,Field4,Field5,Field6,Field7,Field8,Library,Library Ref
+BT1,Battery,Device,Battery
+R2,10K,Device,R
+R4,10K,Device,R
+S1,430152070826,None,Unavailable,Switch Tactile Spst-no 0.05A 12V,None,Wurth Electronics,430152070826,430152070826
+R3,10K,Device,R
+U1,ESP8266-12F_ESP-12F,None,,,,This WiFi module has a 32-bit MCU micro and clock speeds supporting 80 MHz or 160 MHz. Supports the RTOS and integrated Wi-Fi MAC/BB/RF/PA/LNA, and has an on-board antenna.,ESP8266-12E_ESP-12E,ESP8266-12F_ESP-12F
+J3,Bottom breakout,Connector,Conn_01x06_Female
+Q1,BSS138,Transistor_FET,BSS138
+LED1,WS2812B,ws2812b,WS2812B
+LED2,WS2812B,ws2812b,WS2812B
+LED3,WS2812B,ws2812b,WS2812B
+LED4,WS2812B,ws2812b,WS2812B
+U2,CH330N,CH330N,CH330N
+C1,10uF,Device,C
+C2,100nF,Device,C
+C3,100nF,Device,C
+C4,100nF,Device,C
+D1,MBR0520,Diode,MBR0520
+D2,MBR0520,Diode,MBR0520
+R5,R,Device,R
+D3,GREEN LED,Device,LED
+J5,USB_B_Micro,Connector,USB_B_Micro
+R1,10K,Device,R
+J2,Left breakout,Connector,Conn_01x05_Female
+J1,Programming headers,Connector,Conn_01x05_Female
+J4,Right breakout,Connector,Conn_01x03_Female
+C5,100nF,Device,C
