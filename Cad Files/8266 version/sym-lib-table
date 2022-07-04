@@ -1,3 +1,0 @@
-(sym_lib_table
-  (lib (name "8266-dev-rescue")(type "Legacy")(uri "${KIPRJMOD}/8266-dev-rescue.lib")(options "")(descr ""))
-)
