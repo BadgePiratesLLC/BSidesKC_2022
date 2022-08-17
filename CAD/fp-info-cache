@@ -1,4 +1,4 @@
-19915873779617517
+19938346651928096
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -13,468 +13,468 @@ audio belton reverb
 0
 7
 7
-BadgePirateLogos
-BPSkull_Distressed_B.SILK
-
-
-0
-0
-0
-BadgePirateLogos
-BPSkull_Distressed_F.CU
-
-
-0
-0
-0
-BadgePirateLogos
-BPSkull_Distressed_F.Mask
-
-
-0
-0
-0
-BadgePirateLogos
-BPSkull_Distressed_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-BadgePiratesURL_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-BadgePiratesURL_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-FG_B.Cu
-
-
-0
-0
-0
-BadgePirateLogos
-FG_B.SILK
-
-
-0
-0
-0
-BadgePirateLogos
-FG_F.CU
-
-
-0
-0
-0
-BadgePirateLogos
-FG_F.Mask
-
-
-0
-0
-0
-BadgePirateLogos
-FG_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-Jiggle_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-Jiggle_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-LED_Schematic_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-LED_Schematic_F.Mask
-
-
-0
-0
-0
-BadgePirateLogos
-NG_B.Cu
-
-
-0
-0
-0
-BadgePirateLogos
-NG_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-NG_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-pecord_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-pecord_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-rixon_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-rixon_F.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-shi%%y_B.SLK
-
-
-0
-0
-0
-BadgePirateLogos
-shi%%y_F.SLK
-
-
-0
-0
-0
-BadgePiratesCommon
+BadgePirates
 AA
 AA Battery Holder, SMD
 
 0
 8
 4
-BadgePiratesCommon
+BadgePirates
 ACASA1002S1002P100
 ACAS0612
 Resistor Network
 0
 8
 8
-BadgePiratesCommon
+BadgePirates
 Badgelife-SAOv169-BADGE_Side_F.SLK
 Through hole straight IDC box header, 2x03, 2.54mm pitch, double rows
 Through hole IDC box header THT 2x03 2.54mm double row
 0
 6
 6
-BadgePiratesCommon
+BadgePirates
 Badgelife-SAOv169-SAO_Side_B.SLK
 Through hole straight IDC box header, 2x03, 2.54mm pitch, double rows
 Through hole IDC box header THT 2x03 2.54mm double row
 0
 6
 6
-BadgePiratesCommon
+BadgePirates
 BatteryHolder_LINX_BAT-HLD-006-SMT
 2450 Battery Holder
 Undefined or Miscellaneous
 0
 3
 3
-BadgePiratesCommon
+BadgePirates
 BatteryHolder_LINX_BAT-HLD-012-SMT
 SMT battery holder for CR1216/1220/1225, https://linxtechnologies.com/wp/wp-content/uploads/bat-hld-012-smt.pdf
 battery holder coin cell cr1216 cr1220 cr1225
 0
 3
 2
-BadgePiratesCommon
+BadgePirates
 BatteryHolder_MPD_BC2003_1x2032
 2032 Battery Holder
 BC2003 CR2032 2032 Battery Holder
 0
 3
 2
-BadgePiratesCommon
+BadgePirates
 BatteryHolder_MPD_BC2003_1x2032_Fixed
 2032 Battery Holder
 BC2003 CR2032 2032 Battery Holder
 0
 3
 2
-BadgePiratesCommon
+BadgePirates
 C_0805_2012Metric
 Capacitor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: https://docs.google.com/spreadsheets/d/1BsfQQcO9C6DZCsRaXUlFlo91Tg2WpOkGARC1WS5S8t0/edit?usp=sharing), generated with kicad-footprint-generator
 capacitor
 0
 2
 2
-BadgePiratesCommon
+BadgePirates
 ESP-12E
 Wi-Fi Module, http://wiki.ai-thinker.com/_media/esp8266/docs/aithinker_esp_12f_datasheet_en.pdf
 Wi-Fi Module
 0
 22
 22
-BadgePiratesCommon
+BadgePirates
 ESP32-S2-WROOM
 ESP32-S2-WROOM and ESP32-S2-WROOM-I: https://www.espressif.com/sites/default/files/documentation/esp32-s2-wroom_esp32-s2-wroom-i_datasheet_en.pdf
 ESP32-S2
 0
 51
 43
-BadgePiratesCommon
+BadgePirates
 ESP32-S2-WROVER
 ESP32-S2-WROVER and ESP32-S2-WROVER-I: https://www.espressif.com/sites/default/files/documentation/esp32-s2-wrover_esp32-s2-wrover-i_datasheet_en.pdf
 ESP32-S2
 0
 51
 43
-BadgePiratesCommon
+BadgePirates
 Hole_3.5mm
 Mounting Hole 3.5mm
 mounting hole 3.5mm
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Hole_3mm_lapel_pin
 Lapel Pin 3mm Hole, 5.75 pad
 Lapel Pin 3mm Hole, 5.75 pad
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Hole_4.5mm
 Mounting Hole 4.5mm
 mounting hole 4.5mm
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Hole_5.5mm
 Mounting Hole 5.5mm
 mounting hole 5.5mm
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Keystone-54-MFG
 Through Hole, 1865 Side Clips
 Through Hole, 1865 Side Clips
 0
 3
 1
-BadgePiratesCommon
+BadgePirates
 Keystone-1042-0
 18650 Plastic Battery Holder, Surface Mount
 18650 Plastic Battery Holder, Surface Mount
 0
 2
 2
-BadgePiratesCommon
+BadgePirates
 LED_COM-11821
 6 pin RGB LED NeoPixel
 6 pin RGB LED NeoPixel
 0
 6
 6
-BadgePiratesCommon
+BadgePirates
 LED_Osram_Lx_P47F_D2mm_ReverseMount_Proper_Mask Only
 Reverse-mount LED, SMD, Mask removed
 LED ReverseMount Reverse
 0
 4
 2
-BadgePiratesCommon
+BadgePirates
 LED_Osram_Lx_P47F_D2mm_ReverseMount_WHole
 OSRAM, reverse-mount LED, SMD, With a Hole through to Front
 LED ReverseMount Reverse
 0
 4
 2
-BadgePiratesCommon
+BadgePirates
 LTC4054
 constant-voltage linear charger for single cell lithium-ion batteries
 Lipo charger
 0
 5
 5
-BadgePiratesCommon
+BadgePirates
 NE555DR
 D (R-PDSO-G8)
 Integrated Circuit
 0
 8
 8
-BadgePiratesCommon
+BadgePirates
 PinHeader_1x02_P2.54mm_Vertical
 Through hole straight pin header, 1x02, 2.54mm pitch, single row
 Through hole pin header THT 1x02 2.54mm single row
 0
 2
 2
-BadgePiratesCommon
+BadgePirates
 PinHeader_2x03_P2.54mm_Vertical
 Through hole straight pin header, 2x03, 2.54mm pitch, double rows
 Through hole pin header THT 2x03 2.54mm double row
 0
 6
 6
-BadgePiratesCommon
+BadgePirates
 R_1206_3216Metric
 Resistor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator
 resistor
 0
 2
 2
-BadgePiratesCommon
+BadgePirates
 SOIC-8-1EP_W3.9mm
 Standard SOIC8 pin with Center Pad
 Standard SOIC8 pin with Center Pad
 0
 9
 9
-BadgePiratesCommon
+BadgePirates
 SOIC127P600X175-16N
 SO16
 Integrated Circuit
 0
 16
 16
-BadgePiratesCommon
+BadgePirates
 SOT-223
 Standard SOT-223 Footprint
 Standard SOT-223 Footprint
 0
 4
 4
-BadgePiratesCommon
+BadgePirates
 SW_SPDT_CK-JS102011SAQN
 Sub-miniature slide switch, right-angle, http://www.ckswitches.com/media/1422/js.pdf
 switch spdt
 0
 3
 3
-BadgePiratesCommon
+BadgePirates
 SW_SPDT_PCM12
 Ultraminiature Surface Mount Slide Switch, right-angle, https://www.ckswitches.com/media/1424/pcm.pdf
 
 0
 7
 3
-BadgePiratesCommon
+BadgePirates
 SW_SPST_B3S-1000
 Surface Mount Tactile Switch for High-Density Packaging
 Tactile Switch
 0
 4
 2
-BadgePiratesCommon
+BadgePirates
 SW_Slide_1P2T_CK_TH
 CuK miniature slide switch, OS series, SPDT, https://www.ckswitches.com/media/1428/os.pdf
 switch SPDT
 0
 3
 3
-BadgePiratesCommon
+BadgePirates
 Slot_6x4mm
 Slot Hole 6x4
 Slot Hole 6x4
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Slot_7x5mm
 Slot Hole 7x5
 Slot Hole 7x5
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Slot_12x5mm
 Slot Hole 12x5
 Slot Hole 12x5
 0
 1
 0
-BadgePiratesCommon
+BadgePirates
 Switch_Tactile_SMD_B3U-1000P-BPVersion
 Switch Tactile SMB with Larger Pads for ease of Solder and Alighnment
 Switch Tactile SMB with Larger Pads for ease of Solder and Alighnment
 0
 2
 2
-BadgePiratesCommon
+BadgePirates
 TouchPad_10x10mm
 SMD rectangular pad as TouchPad, square 4.0mm side length
 SMD rectangular pad as TouchPad, square 4.0mm side length
 0
 1
 1
-BadgePiratesCommon
+BadgePirates
 TouchPad_B.CU_19
 SMD rectangular pad as test Point, square 4.0mm side length
 test point SMD pad rectangle square
 0
 1
 1
-BadgePiratesCommon
+BadgePirates
 TouchPad_F.CU_19
 SMD rectangular pad as test Point, square 4.0mm side length
 test point SMD pad rectangle square
 0
 1
 1
-BadgePiratesCommon
+BadgePirates
 USB_C_Receptical-Jing
 USB C with Mounting hole
 USB C with Mounting hole
 0
 20
 17
-BadgePiratesCommon
+BadgePirates
 USB_Micro-B_Wuerth
 USB Micro-B receptacle with Mounting Hole
 usb micro receptacle
 0
 9
 6
+BadgePiratesLogo
+BPSkull_Distressed_B.SILK
+
+
+0
+0
+0
+BadgePiratesLogo
+BPSkull_Distressed_F.CU
+
+
+0
+0
+0
+BadgePiratesLogo
+BPSkull_Distressed_F.Mask
+
+
+0
+0
+0
+BadgePiratesLogo
+BPSkull_Distressed_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+BadgePiratesURL_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+BadgePiratesURL_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+FG_B.Cu
+
+
+0
+0
+0
+BadgePiratesLogo
+FG_B.SILK
+
+
+0
+0
+0
+BadgePiratesLogo
+FG_F.CU
+
+
+0
+0
+0
+BadgePiratesLogo
+FG_F.Mask
+
+
+0
+0
+0
+BadgePiratesLogo
+FG_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+Jiggle_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+Jiggle_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+LED_Schematic_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+LED_Schematic_F.Mask
+
+
+0
+0
+0
+BadgePiratesLogo
+NG_B.Cu
+
+
+0
+0
+0
+BadgePiratesLogo
+NG_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+NG_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+pecord_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+pecord_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+rixon_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+rixon_F.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+shi%%y_B.SLK
+
+
+0
+0
+0
+BadgePiratesLogo
+shi%%y_F.SLK
+
+
+0
+0
+0
 Battery
 BatteryHolder_Bulgin_BX0036_1xC
 Bulgin Battery Holder, BX0036, Battery Type C (https://www.bulgin.com/products/pub/media/bulgin/data/Battery_holders.pdf)
@@ -59975,6 +59975,13 @@ Hamamatsu SiPM
 0
 2
 2
+OptoDevice
+Kingbright_KPS-3227
+3.2mmx2.7mm, light sensor, https://www.kingbright.com/attachments/file/psearch/000/00/00/KPS-3227SP1C(Ver.16).pdf
+KPS-3227 Ambient Light Photo Sensor
+0
+4
+4
 OptoDevice
 Kingbright_KPS-5130
 http://www.kingbright.com/attachments/file/psearch/000/00/00/KPS-5130PD7C(Ver.14).pdf
