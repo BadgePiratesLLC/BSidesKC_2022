@@ -2603,7 +2603,7 @@
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000614897e3)
     (property "Reference" "U2" (id 0) (at 161.29 41.91 0))
-    (property "Value" "ESP32-S2-WROVER" (id 1) (at 162.56 44.45 0))
+    (property "Value" "ESP32-S2-WROOM" (id 1) (at 162.56 44.45 0))
     (property "Footprint" "BadgePiratesCommon:ESP32-S2-WROVER" (id 2) (at 171.45 102.87 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -4250,7 +4250,7 @@
       (reference "U1") (unit 1) (value "LTC4054") (footprint "BadgePiratesCommon:LTC4054")
     )
     (path "/00000000-0000-0000-0000-0000614897e3"
-      (reference "U2") (unit 1) (value "ESP32-S2-WROVER") (footprint "BadgePiratesCommon:ESP32-S2-WROVER")
+      (reference "U2") (unit 1) (value "ESP32-S2-WROOM") (footprint "BadgePiratesCommon:ESP32-S2-WROVER")
     )
     (path "/00000000-0000-0000-0000-0000615912ef"
       (reference "U3") (unit 1) (value "CH330N") (footprint "BadgePiratesCommon:SOIC-8-1EP_W3.9mm")
