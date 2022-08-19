@@ -5,13 +5,13 @@
       "Application": "Pcbnew",
       "Version": "(6.0.1)"
     },
-    "CreationDate": "2022-07-03T20:58:28-05:00"
+    "CreationDate": "2022-08-18T19:04:48-05:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
       "Name": "BsidesKC-2022-Safe-Badge",
       "GUID": "42736964-6573-44b4-932d-323032322d53",
-      "Revision": "1.0"
+      "Revision": "0-c"
     },
     "Size": {
       "X": 104.1604,
