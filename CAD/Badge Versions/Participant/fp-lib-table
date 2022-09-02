@@ -1,4 +1,0 @@
-
-(fp_lib_table
-  (lib (name "BsidesKC-2022-Safe-Badge - Participant")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC-2022-Safe-Badge - Participant.pretty")(options "")(descr ""))
-)

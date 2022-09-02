@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "BsidesKC 2022 Poster - Simple")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC 2022 Poster - Simple.pretty")(options "")(descr ""))
+)
