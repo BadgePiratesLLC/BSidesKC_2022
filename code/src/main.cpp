@@ -39,56 +39,8 @@ RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 // Last known rotary position.
 int lastPos = -1;
 
-void setup()
-{
-  Serial.begin(115200);
-  while (! Serial);
-  Serial.println("LimitedRotator example for the RotaryEncoder library.");
-  encoder.setPosition(0 / ROTARYSTEPS); 
-
-
-  // Setup LEDS
-  pinMode(LED_B, OUTPUT); 
-  pinMode(LED_S1, OUTPUT); 
-  pinMode(LED_I, OUTPUT); 
-  pinMode(LED_D, OUTPUT); 
-  pinMode(LED_E, OUTPUT); 
-  pinMode(LED_S2, OUTPUT); 
-  pinMode(LED_0, OUTPUT); 
-  pinMode(LED_1, OUTPUT); 
-  pinMode(LED_2, OUTPUT); 
-  pinMode(LED_3, OUTPUT); 
-  pinMode(LED_4, OUTPUT); 
-  pinMode(LED_5, OUTPUT); 
-  pinMode(LED_6, OUTPUT); 
-  pinMode(LED_7, OUTPUT); 
-  pinMode(LED_8, OUTPUT); 
-  pinMode(LED_9, OUTPUT); 
-  pinMode(LED_10, OUTPUT); 
-  pinMode(LED_11, OUTPUT); 
-
-  digitalWrite(LED_B, LOW);   
-  digitalWrite(LED_S1, LOW);   
-  digitalWrite(LED_I, LOW);   
-  digitalWrite(LED_D, LOW);   
-  digitalWrite(LED_E, LOW);   
-  digitalWrite(LED_S2, LOW); 
-  digitalWrite(LED_0, HIGH);
-  digitalWrite(LED_1, LOW);
-  digitalWrite(LED_2, LOW);
-  digitalWrite(LED_3, LOW);
-  digitalWrite(LED_4, LOW);
-  digitalWrite(LED_5, LOW);
-  digitalWrite(LED_6, LOW);
-  digitalWrite(LED_7, LOW);
-  digitalWrite(LED_8, LOW);
-  digitalWrite(LED_9, LOW);
-  digitalWrite(LED_10, LOW);
-  digitalWrite(LED_11, LOW);  
-}
-
-void turnOnNumber(int numeral) {
-  digitalWrite(LED_0, LOW);
+void turnOffAllLights() {
+digitalWrite(LED_0, LOW);
   digitalWrite(LED_1, LOW);
   digitalWrite(LED_2, LOW);
   digitalWrite(LED_3, LOW);
@@ -100,6 +52,10 @@ void turnOnNumber(int numeral) {
   digitalWrite(LED_9, LOW);
   digitalWrite(LED_10, LOW);
   digitalWrite(LED_11, LOW); 
+}
+
+void turnOnNumber(int numeral) {
+    turnOffAllLights();
 
     switch (numeral) {
     case 0:
@@ -144,27 +100,65 @@ void turnOnNumber(int numeral) {
 }
 
 
+void setup()
+{
+  Serial.begin(115200);
+  while (! Serial);
+  Serial.println("LimitedRotator example for the RotaryEncoder library.");
+  encoder.setPosition(0 / ROTARYSTEPS); 
+
+
+  // Setup LEDS
+  pinMode(LED_B, OUTPUT); 
+  pinMode(LED_S1, OUTPUT); 
+  pinMode(LED_I, OUTPUT); 
+  pinMode(LED_D, OUTPUT); 
+  pinMode(LED_E, OUTPUT); 
+  pinMode(LED_S2, OUTPUT); 
+  pinMode(LED_0, OUTPUT); 
+  pinMode(LED_1, OUTPUT); 
+  pinMode(LED_2, OUTPUT); 
+  pinMode(LED_3, OUTPUT); 
+  pinMode(LED_4, OUTPUT); 
+  pinMode(LED_5, OUTPUT); 
+  pinMode(LED_6, OUTPUT); 
+  pinMode(LED_7, OUTPUT); 
+  pinMode(LED_8, OUTPUT); 
+  pinMode(LED_9, OUTPUT); 
+  pinMode(LED_10, OUTPUT); 
+  pinMode(LED_11, OUTPUT); 
+
+  turnOffAllLights();
+}
+static int pos = 0;
+static int dir = 0;
+static int currentNumber = 0;
+
+static bool DEBUG=false;
 // Read the current position of the encoder and print out when changed.
 void loop()
 {
   encoder.tick();
+  
+  int newPos = encoder.getPosition();
+  int newDir = (int)(encoder.getDirection()) * -1;
 
-  // get the current physical position and calc the logical position
-  int newPos = encoder.getPosition() * ROTARYSTEPS;
+  currentNumber += newDir;
 
-  if (newPos < ROTARYMIN) {
-    encoder.setPosition(ROTARYMAX / ROTARYSTEPS);
-    newPos = ROTARYMAX;
+  if (currentNumber > ROTARYMAX) {
+    currentNumber = ROTARYMIN;
+  } else if (currentNumber < ROTARYMIN) {
+    currentNumber = ROTARYMAX;
+  }
 
-  } else if (newPos > ROTARYMAX) {
-    encoder.setPosition(ROTARYMIN / ROTARYSTEPS);
-    newPos = ROTARYMIN;
-  } 
+  turnOffAllLights();
+  turnOnNumber(currentNumber);
 
-  if (lastPos != newPos) {
-    turnOnNumber(newPos);
+  if (DEBUG && pos != newPos) {
+    Serial.print("pos:");
     Serial.print(newPos);
-    Serial.println();
-    lastPos = newPos;
+    Serial.print(" dir:");
+    Serial.println(newDir);
+    pos = newPos;
   }
 } 
