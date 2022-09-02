@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "Tines SAO")(type KiCad)(uri "$(KIPRJMOD)/Tines SAO.pretty")(options "")(descr ""))
+)

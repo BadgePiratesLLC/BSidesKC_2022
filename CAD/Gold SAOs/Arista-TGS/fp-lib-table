@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "Arista-TGS")(type KiCad)(uri "$(KIPRJMOD)/Arista-TGS.pretty")(options "")(descr ""))
+)
