@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "BsidesKC-2022-Safe-Badge - Speaker")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC-2022-Safe-Badge - Speaker.pretty")(options "")(descr ""))
+)

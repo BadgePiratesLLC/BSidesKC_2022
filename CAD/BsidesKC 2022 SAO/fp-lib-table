@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "BsidesKC SAO - Moon")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC SAO - Moon.pretty")(options "")(descr ""))
+)
