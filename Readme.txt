@@ -27,3 +27,7 @@ io16 - D17 - "8"
 io37 - D18 - "9"
 io12 - D19 - "10"
 io17 - D20 - "11"
+
+Rotary A - 38
+Rotary B - 13
+Rotary Switch - 7
