@@ -30,6 +30,8 @@ const int LED_11 = 17;
 const bool DEBUG=true;
 const bool VERBOSE=false;
 const bool INVERT_DIR=false;
+const int INTERVAL = 500; // ms
+const int BLING_MODE_TIMEOUT_INTERVAL = 2; // 500ms * 2  = ~one seconds
 
 static int pos = 0;
 static int dir = 0;
@@ -46,8 +48,8 @@ enum ProgramState currentState = INPUT_MODE;
 
 long previousTime = 0;
 long currentTime = 0;
-const int INTERVAL = 500; // ms
-const int BLING_MODE_TIMEOUT_INTERVAL = 2; // 500ms * 2  = ~one seconds
+int numIntervalsWithoutInput = 0;
+bool hasInputChangedDuringInterval = false;
 
 
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
@@ -370,9 +372,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PIN_IN2), checkPosition, CHANGE);
 }
 
-int numIntervalsWithoutInput = 0;
-bool hasInputChangedDuringInterval = false;
-
 void loop() {
     previousState = currentState;
     currentTime = millis();
@@ -396,6 +395,7 @@ void loop() {
       }
     }
 
+    // if we go so long without any input fallback to bling mode
     if (numIntervalsWithoutInput >= BLING_MODE_TIMEOUT_INTERVAL) {
       currentState = BLING_MODE;
     } else {
