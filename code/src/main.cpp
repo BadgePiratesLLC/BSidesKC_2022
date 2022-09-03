@@ -27,12 +27,28 @@ const int LED_9 = 37;
 const int LED_10 = 12;
 const int LED_11 = 17;
 
+const bool DEBUG=true;
+const bool VERBOSE=false;
+const bool INVERT_DIR=false;
+
 static int pos = 0;
 static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
 
-static bool DEBUG=false;
+enum ProgramState {
+    BLING_MODE = 0, 
+    INPUT_MODE = 1
+};
+
+enum ProgramState previousState = INPUT_MODE;
+enum ProgramState currentState = INPUT_MODE;
+
+long previousTime = 0;
+long currentTime = 0;
+const int INTERVAL = 500; // ms
+const int BLING_MODE_TIMEOUT_INTERVAL = 2; // 500ms * 2  = ~one seconds
+
 
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
@@ -163,10 +179,14 @@ void pullDownAllPins() {
 
 // Read the current position of the encoder and print out when changed.
 void readEncoder() {
-  encoder.tick();
-  
   int newPos = encoder.getPosition();
-  int newDir = (int)(encoder.getDirection()) * -1;
+  int newDir = (int)(encoder.getDirection());
+  // my board (pecord) has the encoder wired backwards
+  // instead of fixing the solder I "fixed" it in code
+  // if its going backwards for you flip that flag
+  if (INVERT_DIR) {
+    newDir *= -1;
+  }
 
   // save off the previous number 
   lastNumber = currentNumber;
@@ -178,132 +198,165 @@ void readEncoder() {
     currentNumber = ROTARYMAX;
   }
 
-  if (DEBUG && pos != newPos) {
+  if (pos != newPos) {
+    pos = newPos;
+  }
+
+  if (VERBOSE) {
     Serial.print("pos:");
     Serial.print(newPos);
     Serial.print(" dir:");
     Serial.println(newDir);
-    pos = newPos;
   }
 }
 
-// TODO copied from BlinkyLights.ino - ghetto, needs clean up, don't use delay, blocks
+// TODO copied from BlinkyLights.ino - ghetto, needs clean up, don't use delay, blocks for five seconds
 void blingMode() {
-    digitalWrite(3,HIGH);delay(25);
-    digitalWrite(3,LOW);delay(25);
-    digitalWrite(34,HIGH);delay(25);
-    digitalWrite(34,LOW);delay(25);
-    digitalWrite(4,HIGH);delay(25);
-    digitalWrite(4,LOW);delay(25);
-    digitalWrite(33,HIGH);delay(25);
-    digitalWrite(33,LOW);delay(25);
-    digitalWrite(5,HIGH);delay(25);
-    digitalWrite(5,LOW);delay(25);
-    digitalWrite(26,HIGH);delay(25);
-    digitalWrite(26,LOW);delay(25);
+    if (currentState == BLING_MODE && previousState != BLING_MODE) {
+        turnOffAllLights();
+        Serial.println("doing bling mode stuffz");
+    }
+    // digitalWrite(3,HIGH);delay(25);
+    // digitalWrite(3,LOW);delay(25);
+    // digitalWrite(34,HIGH);delay(25);
+    // digitalWrite(34,LOW);delay(25);
+    // digitalWrite(4,HIGH);delay(25);
+    // digitalWrite(4,LOW);delay(25);
+    // digitalWrite(33,HIGH);delay(25);
+    // digitalWrite(33,LOW);delay(25);
+    // digitalWrite(5,HIGH);delay(25);
+    // digitalWrite(5,LOW);delay(25);
+    // digitalWrite(26,HIGH);delay(25);
+    // digitalWrite(26,LOW);delay(25);
 
-    digitalWrite(26,HIGH);delay(25);
-    digitalWrite(26,LOW);delay(25);
-    digitalWrite(5,HIGH);delay(25);
-    digitalWrite(5,LOW);delay(25);
-    digitalWrite(33,HIGH);delay(25);
-    digitalWrite(33,LOW);delay(25);
-    digitalWrite(4,HIGH);delay(25);
-    digitalWrite(4,LOW);delay(25);
-    digitalWrite(34,HIGH);delay(25);
-    digitalWrite(34,LOW);delay(25);
-    digitalWrite(3,HIGH);delay(25);
-    digitalWrite(3,LOW);delay(25);
+    // digitalWrite(26,HIGH);delay(25);
+    // digitalWrite(26,LOW);delay(25);
+    // digitalWrite(5,HIGH);delay(25);
+    // digitalWrite(5,LOW);delay(25);
+    // digitalWrite(33,HIGH);delay(25);
+    // digitalWrite(33,LOW);delay(25);
+    // digitalWrite(4,HIGH);delay(25);
+    // digitalWrite(4,LOW);delay(25);
+    // digitalWrite(34,HIGH);delay(25);
+    // digitalWrite(34,LOW);delay(25);
+    // digitalWrite(3,HIGH);delay(25);
+    // digitalWrite(3,LOW);delay(25);
 
-    digitalWrite(6,HIGH);delay(25);
-    digitalWrite(6,LOW);delay(25);
-    digitalWrite(21,HIGH);delay(25);
-    digitalWrite(21,LOW);delay(25);
-    digitalWrite(14,HIGH);delay(25);
-    digitalWrite(14,LOW);delay(25);
-    digitalWrite(35,HIGH);delay(25);
-    digitalWrite(35,LOW);delay(25);
-    digitalWrite(10,HIGH);delay(25);
-    digitalWrite(10,LOW);delay(25);
-    digitalWrite(15,HIGH);delay(25);
-    digitalWrite(15,LOW);delay(25);
-    digitalWrite(36,HIGH);delay(25);
-    digitalWrite(36,LOW);delay(25);
-    digitalWrite(11,HIGH);delay(25);
-    digitalWrite(11,LOW);delay(25);
-    digitalWrite(16,HIGH);delay(25);
-    digitalWrite(16,LOW);delay(25);
-    digitalWrite(37,HIGH);delay(25);
-    digitalWrite(37,LOW);delay(25);
-    digitalWrite(12,HIGH);delay(25);
-    digitalWrite(12,LOW);delay(25);
-    digitalWrite(17,HIGH);delay(25);
-    digitalWrite(17,LOW);delay(25);
+    // digitalWrite(6,HIGH);delay(25);
+    // digitalWrite(6,LOW);delay(25);
+    // digitalWrite(21,HIGH);delay(25);
+    // digitalWrite(21,LOW);delay(25);
+    // digitalWrite(14,HIGH);delay(25);
+    // digitalWrite(14,LOW);delay(25);
+    // digitalWrite(35,HIGH);delay(25);
+    // digitalWrite(35,LOW);delay(25);
+    // digitalWrite(10,HIGH);delay(25);
+    // digitalWrite(10,LOW);delay(25);
+    // digitalWrite(15,HIGH);delay(25);
+    // digitalWrite(15,LOW);delay(25);
+    // digitalWrite(36,HIGH);delay(25);
+    // digitalWrite(36,LOW);delay(25);
+    // digitalWrite(11,HIGH);delay(25);
+    // digitalWrite(11,LOW);delay(25);
+    // digitalWrite(16,HIGH);delay(25);
+    // digitalWrite(16,LOW);delay(25);
+    // digitalWrite(37,HIGH);delay(25);
+    // digitalWrite(37,LOW);delay(25);
+    // digitalWrite(12,HIGH);delay(25);
+    // digitalWrite(12,LOW);delay(25);
+    // digitalWrite(17,HIGH);delay(25);
+    // digitalWrite(17,LOW);delay(25);
 
-    digitalWrite(17,HIGH);delay(25);
-    digitalWrite(17,LOW);delay(25);
-    digitalWrite(12,HIGH);delay(25);
-    digitalWrite(12,LOW);delay(25);
-    digitalWrite(37,HIGH);delay(25);
-    digitalWrite(37,LOW);delay(25);
-    digitalWrite(16,HIGH);delay(25);
-    digitalWrite(16,LOW);delay(25);
-    digitalWrite(11,HIGH);delay(25);
-    digitalWrite(11,LOW);delay(25);
-    digitalWrite(36,HIGH);delay(25);
-    digitalWrite(36,LOW);delay(25);
-    digitalWrite(15,HIGH);delay(25);
-    digitalWrite(15,LOW);delay(25);
-    digitalWrite(10,HIGH);delay(25);
-    digitalWrite(10,LOW);delay(25);
-    digitalWrite(35,HIGH);delay(25);
-    digitalWrite(35,LOW);delay(25);
-    digitalWrite(14,HIGH);delay(25);
-    digitalWrite(14,LOW);delay(25);
-    digitalWrite(21,HIGH);delay(25);
-    digitalWrite(21,LOW);delay(25);
-    digitalWrite(6,HIGH);delay(25);
-    digitalWrite(6,LOW);delay(25);
+    // digitalWrite(17,HIGH);delay(25);
+    // digitalWrite(17,LOW);delay(25);
+    // digitalWrite(12,HIGH);delay(25);
+    // digitalWrite(12,LOW);delay(25);
+    // digitalWrite(37,HIGH);delay(25);
+    // digitalWrite(37,LOW);delay(25);
+    // digitalWrite(16,HIGH);delay(25);
+    // digitalWrite(16,LOW);delay(25);
+    // digitalWrite(11,HIGH);delay(25);
+    // digitalWrite(11,LOW);delay(25);
+    // digitalWrite(36,HIGH);delay(25);
+    // digitalWrite(36,LOW);delay(25);
+    // digitalWrite(15,HIGH);delay(25);
+    // digitalWrite(15,LOW);delay(25);
+    // digitalWrite(10,HIGH);delay(25);
+    // digitalWrite(10,LOW);delay(25);
+    // digitalWrite(35,HIGH);delay(25);
+    // digitalWrite(35,LOW);delay(25);
+    // digitalWrite(14,HIGH);delay(25);
+    // digitalWrite(14,LOW);delay(25);
+    // digitalWrite(21,HIGH);delay(25);
+    // digitalWrite(21,LOW);delay(25);
+    // digitalWrite(6,HIGH);delay(25);
+    // digitalWrite(6,LOW);delay(25);
 
-    digitalWrite(3,HIGH);delay(25);
-    digitalWrite(34,HIGH);delay(25);
-    digitalWrite(4,HIGH);delay(25);
-    digitalWrite(33,HIGH);delay(25);
-    digitalWrite(5,HIGH);delay(25);
-    digitalWrite(26,HIGH);delay(1000);
-    digitalWrite(26,LOW);delay(25);
-    digitalWrite(5,LOW);delay(25);
-    digitalWrite(33,LOW);delay(25);
-    digitalWrite(4,LOW);delay(25);
-    digitalWrite(34,LOW);delay(25);
-    digitalWrite(3,LOW);delay(25);
+    // digitalWrite(3,HIGH);delay(25);
+    // digitalWrite(34,HIGH);delay(25);
+    // digitalWrite(4,HIGH);delay(25);
+    // digitalWrite(33,HIGH);delay(25);
+    // digitalWrite(5,HIGH);delay(25);
+    // digitalWrite(26,HIGH);delay(1000);
+    // digitalWrite(26,LOW);delay(25);
+    // digitalWrite(5,LOW);delay(25);
+    // digitalWrite(33,LOW);delay(25);
+    // digitalWrite(4,LOW);delay(25);
+    // digitalWrite(34,LOW);delay(25);
+    // digitalWrite(3,LOW);delay(25);
 
-    digitalWrite(6,HIGH);delay(25);
-    digitalWrite(21,HIGH);delay(25);
-    digitalWrite(14,HIGH);delay(25);
-    digitalWrite(35,HIGH);delay(25);
-    digitalWrite(10,HIGH);delay(25);
-    digitalWrite(15,HIGH);delay(25);
-    digitalWrite(36,HIGH);delay(25);
-    digitalWrite(11,HIGH);delay(25);
-    digitalWrite(16,HIGH);delay(25);
-    digitalWrite(37,HIGH);delay(25);
-    digitalWrite(12,HIGH);delay(25);
-    digitalWrite(17,HIGH);delay(1000);
-    digitalWrite(17,LOW);delay(25);
-    digitalWrite(12,LOW);delay(25);
-    digitalWrite(37,LOW);delay(25);
-    digitalWrite(16,LOW);delay(25);
-    digitalWrite(11,LOW);delay(25);
-    digitalWrite(36,LOW);delay(25);
-    digitalWrite(15,LOW);delay(25);
-    digitalWrite(10,LOW);delay(25);
-    digitalWrite(35,LOW);delay(25);
-    digitalWrite(14,LOW);delay(25);
-    digitalWrite(21,LOW);delay(25);
-    digitalWrite(6,LOW);delay(25);
+    // digitalWrite(6,HIGH);delay(25);
+    // digitalWrite(21,HIGH);delay(25);
+    // digitalWrite(14,HIGH);delay(25);
+    // digitalWrite(35,HIGH);delay(25);
+    // digitalWrite(10,HIGH);delay(25);
+    // digitalWrite(15,HIGH);delay(25);
+    // digitalWrite(36,HIGH);delay(25);
+    // digitalWrite(11,HIGH);delay(25);
+    // digitalWrite(16,HIGH);delay(25);
+    // digitalWrite(37,HIGH);delay(25);
+    // digitalWrite(12,HIGH);delay(25);
+    // digitalWrite(17,HIGH);delay(1000);
+    // digitalWrite(17,LOW);delay(25);
+    // digitalWrite(12,LOW);delay(25);
+    // digitalWrite(37,LOW);delay(25);
+    // digitalWrite(16,LOW);delay(25);
+    // digitalWrite(11,LOW);delay(25);
+    // digitalWrite(36,LOW);delay(25);
+    // digitalWrite(15,LOW);delay(25);
+    // digitalWrite(10,LOW);delay(25);
+    // digitalWrite(35,LOW);delay(25);
+    // digitalWrite(14,LOW);delay(25);
+    // digitalWrite(21,LOW);delay(25);
+    // digitalWrite(6,LOW);delay(25);
 }
 
+void updateNumber(int lastNumber, int currentNumber) {
+  turnOffNumber(lastNumber);
+  turnOnNumber(currentNumber);
+}
+
+bool hasInputChanged() {
+    readEncoder();
+    if (lastNumber != currentNumber) return true;
+    return false;
+}
+
+// TODO see about using interupts for detecting when the input changes
+void inputMode(bool hasInputChanged) {
+    if (currentState == INPUT_MODE && previousState == BLING_MODE) {
+      Serial.println("doing input mode stuffz");
+    }
+    // currently handles spinning the encoder knob and updating the numbers
+    // needs to also "save" off the number when they press the button
+    if (hasInputChanged) {
+        updateNumber(lastNumber, currentNumber);
+    }  
+}
+
+IRAM_ATTR void checkPosition() {
+  encoder.tick(); // just call tick() to check the state.
+}
 
 void setup() {
   Serial.begin(115200);
@@ -311,20 +364,69 @@ void setup() {
   encoder.setPosition(0 / ROTARYSTEPS); 
   pullDownAllPins();
   turnOffAllLights();
+  
+  // register interrupt routine
+  attachInterrupt(digitalPinToInterrupt(PIN_IN1), checkPosition, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_IN2), checkPosition, CHANGE);
 }
 
-void loop() {
-  readEncoder();
-  
-  // if we have a new position 
-  if (lastNumber != currentNumber) {
-    turnOffNumber(lastNumber);
-    turnOnNumber(currentNumber);    
-  } else {
-    // TODO find a way to to work in Kevin's blinky code
-    // first thought is if the position doesn't change after ~1 sec it goes into "blinky" mode
-    //blingMode();
-  }
-  
+int numIntervalsWithoutInput = 0;
+bool hasInputChangedDuringInterval = false;
 
+void loop() {
+    previousState = currentState;
+    currentTime = millis();
+
+    encoder.tick();
+    bool inputChanged = hasInputChanged();
+
+    if (inputChanged) { 
+      hasInputChangedDuringInterval = true;
+    }
+
+    // TODO move into a timer instead of doing it in the main loop
+    if (currentTime - previousTime >= INTERVAL) {
+      previousTime = currentTime;
+
+      if (hasInputChangedDuringInterval) {
+        hasInputChangedDuringInterval = false;
+        numIntervalsWithoutInput = 0;
+      } else {
+        numIntervalsWithoutInput += 1;
+      }
+    }
+
+    if (numIntervalsWithoutInput >= BLING_MODE_TIMEOUT_INTERVAL) {
+      currentState = BLING_MODE;
+    } else {
+      currentState = INPUT_MODE;
+    }
+
+    if (DEBUG && previousState != currentState) {
+      Serial.print("Interval time has passed: ");
+      Serial.print(INTERVAL);
+      Serial.print("ms, hasInputChangedDuringInterval: ");
+      Serial.print(hasInputChangedDuringInterval ? "true" : "false");
+      Serial.print(", numIntervalsWithoutInput: ");
+      Serial.print(numIntervalsWithoutInput);
+      Serial.print(", current state: ");
+      Serial.println(currentState == INPUT_MODE ? "input mode" : "bling mode");
+    }
+
+    // two states to start - "bling" mode and "input" mode
+    // if the input hasn't changed for a second or two go into bling mode
+    // once the knob moves, come out of bling mode into input mode
+
+    //ghetto state machine
+    switch(currentState) {
+      case BLING_MODE:
+        blingMode();
+        break;
+      case INPUT_MODE:
+        inputMode(inputChanged);
+        break;
+      default:
+        inputMode(inputChanged);
+    }
+  
 } 
