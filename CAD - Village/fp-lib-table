@@ -1,4 +1,4 @@
 
 (fp_lib_table
-  (lib (name "BsidesKC-2022-Safe-Badge - Village")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC-2022-Safe-Badge - Village.pretty")(options "")(descr ""))
+  (lib (name "BsidesKC-2022-Safe-Badge")(type KiCad)(uri "$(KIPRJMOD)/BsidesKC-2022-Safe-Badge.pretty")(options "")(descr ""))
 )
