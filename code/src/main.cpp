@@ -27,7 +27,7 @@ const int LED_9 = 37;
 const int LED_10 = 12;
 const int LED_11 = 17;
 
-const bool DEBUG=true;
+const bool DEBUG=false;
 const bool VERBOSE=false;
 const bool INVERT_DIR=false;
 const int INTERVAL = 500; // ms
@@ -373,60 +373,61 @@ void setup() {
 }
 
 void loop() {
-    previousState = currentState;
-    currentTime = millis();
+  encoder.tick();
 
-    encoder.tick();
-    bool inputChanged = hasInputChanged();
+  previousState = currentState;
+  currentTime = millis();
+  bool inputChanged = hasInputChanged();
 
-    if (inputChanged) { 
-      hasInputChangedDuringInterval = true;
-    }
+  if (inputChanged) { 
+    hasInputChangedDuringInterval = true;
+  }
 
-    // TODO move into a timer instead of doing it in the main loop
-    if (currentTime - previousTime >= INTERVAL) {
-      previousTime = currentTime;
+  // TODO move into a timer instead of doing it in the main loop
+  // and/or look into using the encoder.getMillisBetweenRotations function 
+  if (currentTime - previousTime >= INTERVAL) {
+    previousTime = currentTime;
 
-      if (hasInputChangedDuringInterval) {
-        hasInputChangedDuringInterval = false;
-        numIntervalsWithoutInput = 0;
-      } else {
-        numIntervalsWithoutInput += 1;
-      }
-    }
-
-    // if we go so long without any input fallback to bling mode
-    if (numIntervalsWithoutInput >= BLING_MODE_TIMEOUT_INTERVAL) {
-      currentState = BLING_MODE;
+    if (hasInputChangedDuringInterval) {
+      hasInputChangedDuringInterval = false;
+      numIntervalsWithoutInput = 0;
     } else {
-      currentState = INPUT_MODE;
+      numIntervalsWithoutInput += 1;
     }
+  }
 
-    if (DEBUG && previousState != currentState) {
-      Serial.print("Interval time has passed: ");
-      Serial.print(INTERVAL);
-      Serial.print("ms, hasInputChangedDuringInterval: ");
-      Serial.print(hasInputChangedDuringInterval ? "true" : "false");
-      Serial.print(", numIntervalsWithoutInput: ");
-      Serial.print(numIntervalsWithoutInput);
-      Serial.print(", current state: ");
-      Serial.println(currentState == INPUT_MODE ? "input mode" : "bling mode");
-    }
+  // if we go so long without any input fallback to bling mode
+  if (numIntervalsWithoutInput >= BLING_MODE_TIMEOUT_INTERVAL) {
+    currentState = BLING_MODE;
+  } else {
+    currentState = INPUT_MODE;
+  }
 
-    // two states to start - "bling" mode and "input" mode
-    // if the input hasn't changed for a second or two go into bling mode
-    // once the knob moves, come out of bling mode into input mode
+  if (DEBUG && previousState != currentState) {
+    Serial.print("Interval time has passed: ");
+    Serial.print(INTERVAL);
+    Serial.print("ms, hasInputChangedDuringInterval: ");
+    Serial.print(hasInputChangedDuringInterval ? "true" : "false");
+    Serial.print(", numIntervalsWithoutInput: ");
+    Serial.print(numIntervalsWithoutInput);
+    Serial.print(", current state: ");
+    Serial.println(currentState == INPUT_MODE ? "input mode" : "bling mode");
+  }
 
-    //ghetto state machine
-    switch(currentState) {
-      case BLING_MODE:
-        blingMode();
-        break;
-      case INPUT_MODE:
-        inputMode(inputChanged);
-        break;
-      default:
-        inputMode(inputChanged);
-    }
-  
+  // two states to start - "bling" mode and "input" mode
+  // if the input hasn't changed for a second or two go into bling mode
+  // once the knob moves, come out of bling mode into input mode
+
+  //ghetto state machine
+  switch(currentState) {
+    case BLING_MODE:
+      blingMode();
+      break;
+    case INPUT_MODE:
+      inputMode(inputChanged);
+      break;
+    default:
+      inputMode(inputChanged);
+  }
+
 } 
