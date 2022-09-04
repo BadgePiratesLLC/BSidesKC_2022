@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <RotaryEncoder.h>
+#include <BfButton.h>
 
 #define PIN_IN1 13
 #define PIN_IN2 38
@@ -37,6 +38,10 @@ static int pos = 0;
 static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
+
+const unsigned int ROTARY_SWITCH = 7;
+
+BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
 class Flasher
 {
@@ -111,6 +116,22 @@ Flasher led1 = Flasher();
 
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
+
+void pressHandler (BfButton *btn, BfButton::press_pattern_t pattern) {
+  switch (pattern) {
+    case BfButton::SINGLE_PRESS:
+      Serial.println("Single push");
+      break;
+      
+    case BfButton::DOUBLE_PRESS:
+      Serial.println("Double push");
+      break;
+      
+    case BfButton::LONG_PRESS:
+      Serial.println("Long push");
+      break;
+  }
+}
 
 void turnOffAllLights() {
   digitalWrite(LED_0, LOW);
@@ -316,10 +337,17 @@ void setup() {
   // register interrupt routine
   attachInterrupt(digitalPinToInterrupt(PIN_IN1), checkPosition, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_IN2), checkPosition, CHANGE);
+
+  //Butt stuff
+  //Button settings
+  btn.onPress(pressHandler)
+  .onDoublePress(pressHandler) // default timeout
+  .onPressFor(pressHandler, 1000); // custom timeout for 1 second
 }
 
 void loop() {
   encoder.tick();
+  btn.read();
 
   previousState = currentState;
   currentTime = millis();
