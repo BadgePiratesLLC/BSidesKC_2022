@@ -38,6 +38,63 @@ static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
 
+class Flasher
+{
+	// Class Member Variables
+	// These are initialized at startup
+	int ledPin = LED_B;      // the number of the LED pin
+	long OnTime = 25;     // milliseconds of on-time
+	long OffTime = 25;    // milliseconds of off-time
+  int interval = 25;
+  int index = 0;
+  const static int INDEX_MAX = 132;
+
+  int pattern[INDEX_MAX][2] = {
+    // bsides letters on then off in forward order
+    {LED_B, HIGH}, {LED_B, LOW}, {LED_S1, HIGH}, {LED_S1, LOW}, {LED_I, HIGH}, {LED_I, LOW}, {LED_D, HIGH}, {LED_D, LOW}, {LED_E, HIGH}, {LED_E, LOW}, {LED_S2, HIGH}, {LED_S2, LOW}, 
+    // bsides letters on then off in backwards order
+    {LED_S2, HIGH}, {LED_S2, LOW}, {LED_E, HIGH}, {LED_E, LOW}, {LED_D, HIGH}, {LED_D, LOW}, {LED_I, HIGH}, {LED_I, LOW}, {LED_S1, HIGH}, {LED_S1, LOW}, {LED_B, HIGH}, {LED_B, LOW},
+    // all the number leds on and off in forward order
+    {LED_0, HIGH}, {LED_0, LOW}, {LED_1, HIGH}, {LED_1, LOW}, {LED_2, HIGH}, {LED_2, LOW}, {LED_3, HIGH}, {LED_3, LOW}, {LED_4, HIGH}, {LED_4, LOW}, {LED_5, HIGH}, {LED_5, LOW}, {LED_6, HIGH}, {LED_6, LOW}, {LED_7, HIGH}, {LED_7, LOW}, {LED_8, HIGH}, {LED_8, LOW}, {LED_9, HIGH}, {LED_9, LOW}, {LED_10, HIGH}, {LED_10, LOW}, {LED_11, HIGH}, {LED_11, LOW},
+    // all the number leds on then off in backwards order
+    {LED_11, HIGH}, {LED_11, LOW}, {LED_10, HIGH}, {LED_10, LOW}, {LED_9, HIGH}, {LED_9, LOW}, {LED_8, HIGH}, {LED_8, LOW}, {LED_7, HIGH}, {LED_7, LOW}, {LED_6, HIGH}, {LED_6, LOW}, {LED_5, HIGH}, {LED_5, LOW}, {LED_4, HIGH}, {LED_4, LOW}, {LED_3, HIGH}, {LED_3, LOW}, {LED_2, HIGH}, {LED_2, LOW}, {LED_1, HIGH}, {LED_1, LOW}, {LED_0, HIGH}, {LED_0, LOW},
+    // light up all the letters then turn them all off in reverse order
+    {LED_B, HIGH}, {LED_S1, HIGH}, {LED_I, HIGH}, {LED_D, HIGH}, {LED_E, HIGH}, {LED_S2, HIGH}, 
+    {LED_S2, LOW}, {LED_E, LOW}, {LED_D, LOW}, {LED_I, LOW}, {LED_S1, LOW}, {LED_B, LOW}, 
+    // light up all the numbers in order then turn them all off in reverse order
+    {LED_0, HIGH}, {LED_1, HIGH}, {LED_2, HIGH},{LED_3, HIGH}, {LED_4, HIGH}, {LED_5, HIGH},{LED_6, HIGH}, {LED_7, HIGH}, {LED_8, HIGH}, {LED_9, HIGH}, {LED_10, HIGH}, {LED_11, HIGH},
+    {LED_11, LOW}, {LED_10, LOW}, {LED_9, LOW}, {LED_8, LOW}, {LED_7, LOW}, {LED_6, LOW}, {LED_5, LOW}, {LED_4, LOW}, {LED_3, LOW}, {LED_2, LOW}, {LED_1, LOW}, {LED_0, LOW}
+  };
+
+	// These maintain the current state
+	int ledState;             		// ledState used to set the LED
+	unsigned long previousMillis;  	// will store last time LED was updated
+
+  // Constructor - creates a Flasher 
+  // and initializes the member variables and state
+  public:
+  Flasher()
+  {	
+	ledState = LOW; 
+	previousMillis = 0;
+  }
+
+  void Update(unsigned long currentMillis)
+  {
+    // check to see if it's time to change the state of the LED
+    ledPin = pattern[index][0];
+    ledState = pattern[index][1];
+    if ((currentMillis - previousMillis >= OffTime)) {
+      digitalWrite(ledPin, ledState);	  // Update the actual LED
+      previousMillis = currentMillis;   // Remember the time
+      index+=1;                         // update the
+      if (index >= INDEX_MAX) {         // reset index after the end of the array
+        index = 0;
+      }
+    }
+  }
+};
+
 enum ProgramState {
     BLING_MODE = 0, 
     INPUT_MODE = 1
@@ -46,11 +103,11 @@ enum ProgramState {
 enum ProgramState previousState = INPUT_MODE;
 enum ProgramState currentState = INPUT_MODE;
 
-long previousTime = 0;
-long currentTime = 0;
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
 int numIntervalsWithoutInput = 0;
 bool hasInputChangedDuringInterval = false;
-
+Flasher led1 = Flasher();
 
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
@@ -213,124 +270,13 @@ void readEncoder() {
 }
 
 // TODO copied from BlinkyLights.ino - ghetto, needs clean up, don't use delay, blocks for five seconds
-void blingMode() {
+void blingMode(unsigned long currentTime) {
     if (currentState == BLING_MODE && previousState != BLING_MODE) {
         turnOffAllLights();
         Serial.println("doing bling mode stuffz");
     }
-    // digitalWrite(3,HIGH);delay(25);
-    // digitalWrite(3,LOW);delay(25);
-    // digitalWrite(34,HIGH);delay(25);
-    // digitalWrite(34,LOW);delay(25);
-    // digitalWrite(4,HIGH);delay(25);
-    // digitalWrite(4,LOW);delay(25);
-    // digitalWrite(33,HIGH);delay(25);
-    // digitalWrite(33,LOW);delay(25);
-    // digitalWrite(5,HIGH);delay(25);
-    // digitalWrite(5,LOW);delay(25);
-    // digitalWrite(26,HIGH);delay(25);
-    // digitalWrite(26,LOW);delay(25);
-
-    // digitalWrite(26,HIGH);delay(25);
-    // digitalWrite(26,LOW);delay(25);
-    // digitalWrite(5,HIGH);delay(25);
-    // digitalWrite(5,LOW);delay(25);
-    // digitalWrite(33,HIGH);delay(25);
-    // digitalWrite(33,LOW);delay(25);
-    // digitalWrite(4,HIGH);delay(25);
-    // digitalWrite(4,LOW);delay(25);
-    // digitalWrite(34,HIGH);delay(25);
-    // digitalWrite(34,LOW);delay(25);
-    // digitalWrite(3,HIGH);delay(25);
-    // digitalWrite(3,LOW);delay(25);
-
-    // digitalWrite(6,HIGH);delay(25);
-    // digitalWrite(6,LOW);delay(25);
-    // digitalWrite(21,HIGH);delay(25);
-    // digitalWrite(21,LOW);delay(25);
-    // digitalWrite(14,HIGH);delay(25);
-    // digitalWrite(14,LOW);delay(25);
-    // digitalWrite(35,HIGH);delay(25);
-    // digitalWrite(35,LOW);delay(25);
-    // digitalWrite(10,HIGH);delay(25);
-    // digitalWrite(10,LOW);delay(25);
-    // digitalWrite(15,HIGH);delay(25);
-    // digitalWrite(15,LOW);delay(25);
-    // digitalWrite(36,HIGH);delay(25);
-    // digitalWrite(36,LOW);delay(25);
-    // digitalWrite(11,HIGH);delay(25);
-    // digitalWrite(11,LOW);delay(25);
-    // digitalWrite(16,HIGH);delay(25);
-    // digitalWrite(16,LOW);delay(25);
-    // digitalWrite(37,HIGH);delay(25);
-    // digitalWrite(37,LOW);delay(25);
-    // digitalWrite(12,HIGH);delay(25);
-    // digitalWrite(12,LOW);delay(25);
-    // digitalWrite(17,HIGH);delay(25);
-    // digitalWrite(17,LOW);delay(25);
-
-    // digitalWrite(17,HIGH);delay(25);
-    // digitalWrite(17,LOW);delay(25);
-    // digitalWrite(12,HIGH);delay(25);
-    // digitalWrite(12,LOW);delay(25);
-    // digitalWrite(37,HIGH);delay(25);
-    // digitalWrite(37,LOW);delay(25);
-    // digitalWrite(16,HIGH);delay(25);
-    // digitalWrite(16,LOW);delay(25);
-    // digitalWrite(11,HIGH);delay(25);
-    // digitalWrite(11,LOW);delay(25);
-    // digitalWrite(36,HIGH);delay(25);
-    // digitalWrite(36,LOW);delay(25);
-    // digitalWrite(15,HIGH);delay(25);
-    // digitalWrite(15,LOW);delay(25);
-    // digitalWrite(10,HIGH);delay(25);
-    // digitalWrite(10,LOW);delay(25);
-    // digitalWrite(35,HIGH);delay(25);
-    // digitalWrite(35,LOW);delay(25);
-    // digitalWrite(14,HIGH);delay(25);
-    // digitalWrite(14,LOW);delay(25);
-    // digitalWrite(21,HIGH);delay(25);
-    // digitalWrite(21,LOW);delay(25);
-    // digitalWrite(6,HIGH);delay(25);
-    // digitalWrite(6,LOW);delay(25);
-
-    // digitalWrite(3,HIGH);delay(25);
-    // digitalWrite(34,HIGH);delay(25);
-    // digitalWrite(4,HIGH);delay(25);
-    // digitalWrite(33,HIGH);delay(25);
-    // digitalWrite(5,HIGH);delay(25);
-    // digitalWrite(26,HIGH);delay(1000);
-    // digitalWrite(26,LOW);delay(25);
-    // digitalWrite(5,LOW);delay(25);
-    // digitalWrite(33,LOW);delay(25);
-    // digitalWrite(4,LOW);delay(25);
-    // digitalWrite(34,LOW);delay(25);
-    // digitalWrite(3,LOW);delay(25);
-
-    // digitalWrite(6,HIGH);delay(25);
-    // digitalWrite(21,HIGH);delay(25);
-    // digitalWrite(14,HIGH);delay(25);
-    // digitalWrite(35,HIGH);delay(25);
-    // digitalWrite(10,HIGH);delay(25);
-    // digitalWrite(15,HIGH);delay(25);
-    // digitalWrite(36,HIGH);delay(25);
-    // digitalWrite(11,HIGH);delay(25);
-    // digitalWrite(16,HIGH);delay(25);
-    // digitalWrite(37,HIGH);delay(25);
-    // digitalWrite(12,HIGH);delay(25);
-    // digitalWrite(17,HIGH);delay(1000);
-    // digitalWrite(17,LOW);delay(25);
-    // digitalWrite(12,LOW);delay(25);
-    // digitalWrite(37,LOW);delay(25);
-    // digitalWrite(16,LOW);delay(25);
-    // digitalWrite(11,LOW);delay(25);
-    // digitalWrite(36,LOW);delay(25);
-    // digitalWrite(15,LOW);delay(25);
-    // digitalWrite(10,LOW);delay(25);
-    // digitalWrite(35,LOW);delay(25);
-    // digitalWrite(14,LOW);delay(25);
-    // digitalWrite(21,LOW);delay(25);
-    // digitalWrite(6,LOW);delay(25);
+    led1.Update(currentTime);
+ 
 }
 
 void updateNumber(int lastNumber, int currentNumber) {
@@ -385,7 +331,7 @@ void loop() {
 
   // TODO move into a timer instead of doing it in the main loop
   // and/or look into using the encoder.getMillisBetweenRotations function 
-  if (currentTime - previousTime >= INTERVAL) {
+  if ((currentTime - previousTime) >= INTERVAL) {
     previousTime = currentTime;
 
     if (hasInputChangedDuringInterval) {
@@ -421,7 +367,7 @@ void loop() {
   //ghetto state machine
   switch(currentState) {
     case BLING_MODE:
-      blingMode();
+      blingMode(currentTime);
       break;
     case INPUT_MODE:
       inputMode(inputChanged);
