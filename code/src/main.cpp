@@ -42,6 +42,11 @@ static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
 
+int inputPosition = 0;
+int userInput[7] = {0,0,0,0,0,0,0};
+int code1[7] =     {8,4,0,0,0,0,0};
+int codeJenny[7] =     {8,6,7,5,3,0,9};
+
 
 int selectedBling = 0;
 const int numBling = 2;
@@ -161,6 +166,40 @@ void handleBlingChange() {
   }
 }
 
+void resetUserInput() {
+    inputPosition = 0;
+    for(int i = 0; i < 7; i++)
+    {
+      userInput[i] = 0;
+    }
+}
+
+void checkIsValidCode() {
+    boolean isCode1 = true;
+    boolean isCodeJenny = true;
+  
+    long i = 0;
+    // Check code 1
+    while(i<7 && isCode1) { 
+      isCode1 = userInput[i] == code1[i];
+      i++;
+    }
+
+    i = 0;
+    while (i<7 && isCodeJenny) {
+      isCodeJenny = userInput[i] == codeJenny[i];
+      i++;
+    }
+
+    if (isCode1) {
+      Serial.println("CODE 1 MATCHES");
+    }
+
+    if(isCodeJenny) {
+      Serial.println("CODE JENNY TYPED IN");
+    }
+}
+
 void pressHandler (BfButton *btn, BfButton::press_pattern_t pattern) {
   switch (pattern) {
     case BfButton::SINGLE_PRESS:
@@ -171,6 +210,18 @@ void pressHandler (BfButton *btn, BfButton::press_pattern_t pattern) {
         Serial.print("Selected Number: ");
         Serial.print(currentNumber);
         Serial.println("");
+        userInput[inputPosition] = currentNumber;
+        checkIsValidCode();
+        if(inputPosition < 6) {
+          inputPosition++;
+        } else { 
+          resetUserInput();
+        }
+
+        for(int i = 0; i < 7; i++)
+        {
+          Serial.println(userInput[i]);
+        }
       }
       break;
       
