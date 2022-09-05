@@ -248,6 +248,12 @@ void turnOffAllLights() {
   digitalWrite(LED_9, LOW);
   digitalWrite(LED_10, LOW);
   digitalWrite(LED_11, LOW); 
+  digitalWrite(LED_B, LOW); 
+  digitalWrite(LED_S1, LOW); 
+  digitalWrite(LED_I, LOW); 
+  digitalWrite(LED_D, LOW); 
+  digitalWrite(LED_E, LOW); 
+  digitalWrite(LED_S2, LOW); 
 }
 
 //TODO make a lookup table for the numeral -> LED_X
@@ -395,6 +401,7 @@ void readEncoder() {
 // TODO copied from BlinkyLights.ino - ghetto, needs clean up, don't use delay, blocks for five seconds
 void blingMode(unsigned long currentTime) {
     if (currentState == BLING_MODE && previousState != BLING_MODE) {
+        resetUserInput();
         turnOffAllLights();
         Serial.println("doing bling mode stuffz");
     }
@@ -417,6 +424,7 @@ bool hasInputChanged() {
 // TODO see about using interupts for detecting when the input changes
 void inputMode(bool hasInputChanged) {
     if (currentState == INPUT_MODE && previousState == BLING_MODE) {
+      turnOffAllLights();
       Serial.println("doing input mode stuffz");
     }
     // currently handles spinning the encoder knob and updating the numbers
