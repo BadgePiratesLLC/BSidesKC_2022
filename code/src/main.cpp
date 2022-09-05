@@ -29,18 +29,19 @@ const int LED_9 = 37;
 const int LED_10 = 12;
 const int LED_11 = 17;
 
+const unsigned int ROTARY_SWITCH = 7;
+
 const bool DEBUG=false;
 const bool VERBOSE=false;
 const bool INVERT_DIR=false;
 const int INTERVAL = 500; // ms
-const int BLING_MODE_TIMEOUT_INTERVAL = 2; // 500ms * 2  = ~one seconds
+const int BLING_MODE_TIMEOUT_INTERVAL = 6; // 500ms * 2  = ~one seconds
 
 static int pos = 0;
 static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
 
-const unsigned int ROTARY_SWITCH = 7;
 
 int selectedBling = 0;
 const int numBling = 2;
@@ -153,12 +154,6 @@ RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 
 
 void handleBlingChange() {
-    Serial.print("Selected Bling: ");
-    Serial.print(selectedBling);
-    Serial.println("");
-    Serial.print("num bling -1: ");
-    Serial.print(numBling -1);
-    Serial.println("");
   if(selectedBling >= numBling - 1) {
     selectedBling = 0;
   } else {
@@ -169,8 +164,14 @@ void handleBlingChange() {
 void pressHandler (BfButton *btn, BfButton::press_pattern_t pattern) {
   switch (pattern) {
     case BfButton::SINGLE_PRESS:
-      Serial.println("Single push, changing bling");
-      handleBlingChange();
+      if(currentState == BLING_MODE) {
+        handleBlingChange();
+      } else {
+        numIntervalsWithoutInput = 0;
+        Serial.print("Selected Number: ");
+        Serial.print(currentNumber);
+        Serial.println("");
+      }
       break;
       
     case BfButton::DOUBLE_PRESS:
