@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <RotaryEncoder.h>
 #include <BfButton.h>
+#include <EEPROM.h>
 
 #define PIN_IN1 13
 #define PIN_IN2 38
@@ -41,6 +42,9 @@ static int lastNumber = 0;
 
 const unsigned int ROTARY_SWITCH = 7;
 
+int selectedBling = 0;
+const int numBling = 2;
+
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
 class Flasher
@@ -52,9 +56,10 @@ class Flasher
 	long OffTime = 25;    // milliseconds of off-time
   int interval = 25;
   int index = 0;
-  const static int INDEX_MAX = 132;
+  const static int PATTERN_1_INDEX_MAX = 132;
+  const static int PATTERN_2_INDEX_MAX = 24;
 
-  int pattern[INDEX_MAX][2] = {
+  int pattern[PATTERN_1_INDEX_MAX][2] = {
     // bsides letters on then off in forward order
     {LED_B, HIGH}, {LED_B, LOW}, {LED_S1, HIGH}, {LED_S1, LOW}, {LED_I, HIGH}, {LED_I, LOW}, {LED_D, HIGH}, {LED_D, LOW}, {LED_E, HIGH}, {LED_E, LOW}, {LED_S2, HIGH}, {LED_S2, LOW}, 
     // bsides letters on then off in backwards order
@@ -69,6 +74,14 @@ class Flasher
     // light up all the numbers in order then turn them all off in reverse order
     {LED_0, HIGH}, {LED_1, HIGH}, {LED_2, HIGH},{LED_3, HIGH}, {LED_4, HIGH}, {LED_5, HIGH},{LED_6, HIGH}, {LED_7, HIGH}, {LED_8, HIGH}, {LED_9, HIGH}, {LED_10, HIGH}, {LED_11, HIGH},
     {LED_11, LOW}, {LED_10, LOW}, {LED_9, LOW}, {LED_8, LOW}, {LED_7, LOW}, {LED_6, LOW}, {LED_5, LOW}, {LED_4, LOW}, {LED_3, LOW}, {LED_2, LOW}, {LED_1, LOW}, {LED_0, LOW}
+  };
+
+
+  int inputPattern[PATTERN_2_INDEX_MAX][2] = {
+    // bsides letters on then off in forward order
+    {LED_B, HIGH}, {LED_B, LOW}, {LED_S1, HIGH}, {LED_S1, LOW}, {LED_I, HIGH}, {LED_I, LOW}, {LED_D, HIGH}, {LED_D, LOW}, {LED_E, HIGH}, {LED_E, LOW}, {LED_S2, HIGH}, {LED_S2, LOW}, 
+    // bsides letters on then off in backwards order
+    {LED_S2, HIGH}, {LED_S2, LOW}, {LED_E, HIGH}, {LED_E, LOW}, {LED_D, HIGH}, {LED_D, LOW}, {LED_I, HIGH}, {LED_I, LOW}, {LED_S1, HIGH}, {LED_S1, LOW}, {LED_B, HIGH}, {LED_B, LOW},
   };
 
 	// These maintain the current state
@@ -86,17 +99,38 @@ class Flasher
 
   void Update(unsigned long currentMillis)
   {
-    // check to see if it's time to change the state of the LED
-    ledPin = pattern[index][0];
-    ledState = pattern[index][1];
-    if ((currentMillis - previousMillis >= OffTime)) {
-      digitalWrite(ledPin, ledState);	  // Update the actual LED
-      previousMillis = currentMillis;   // Remember the time
-      index+=1;                         // update the
-      if (index >= INDEX_MAX) {         // reset index after the end of the array
-        index = 0;
-      }
+
+    switch(selectedBling) {
+      case 0:
+        // check to see if it's time to change the state of the LED
+        ledPin = pattern[index][0];
+        ledState = pattern[index][1];
+
+        if ((currentMillis - previousMillis >= OffTime)) {
+          digitalWrite(ledPin, ledState);	  // Update the actual LED
+          previousMillis = currentMillis;   // Remember the time
+          index+=1;                         // update the
+          if (index >= PATTERN_1_INDEX_MAX) {         // reset index after the end of the array
+            index = 0;
+          }
+        }
+        break;
+      case 1:
+        // check to see if it's time to change the state of the LED
+        ledPin = inputPattern[index][0];
+        ledState = inputPattern[index][1];
+
+        if ((currentMillis - previousMillis >= OffTime)) {
+          digitalWrite(ledPin, ledState);	  // Update the actual LED
+          previousMillis = currentMillis;   // Remember the time
+          index+=1;                         // update the
+          if (index >= PATTERN_2_INDEX_MAX) {         // reset index after the end of the array
+            index = 0;
+          }
+        }
     }
+
+    
   }
 };
 
@@ -117,10 +151,26 @@ Flasher led1 = Flasher();
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 
+
+void handleBlingChange() {
+    Serial.print("Selected Bling: ");
+    Serial.print(selectedBling);
+    Serial.println("");
+    Serial.print("num bling -1: ");
+    Serial.print(numBling -1);
+    Serial.println("");
+  if(selectedBling >= numBling - 1) {
+    selectedBling = 0;
+  } else {
+    selectedBling++;
+  }
+}
+
 void pressHandler (BfButton *btn, BfButton::press_pattern_t pattern) {
   switch (pattern) {
     case BfButton::SINGLE_PRESS:
-      Serial.println("Single push");
+      Serial.println("Single push, changing bling");
+      handleBlingChange();
       break;
       
     case BfButton::DOUBLE_PRESS:
@@ -263,7 +313,7 @@ void readEncoder() {
   int newDir = (int)(encoder.getDirection());
   // my board (pecord) has the encoder wired backwards
   // instead of fixing the solder I "fixed" it in code
-  // if its going backwards for you flip that flag
+  // if its going backwards for you flip that flagoh
   if (INVERT_DIR) {
     newDir *= -1;
   }
@@ -304,6 +354,7 @@ void updateNumber(int lastNumber, int currentNumber) {
   turnOffNumber(lastNumber);
   turnOnNumber(currentNumber);
 }
+
 
 bool hasInputChanged() {
     readEncoder();
