@@ -1,0 +1,4 @@
+
+(fp_lib_table
+  (lib (name "Soldering Crew Badge")(type KiCad)(uri "$(KIPRJMOD)/Soldering Crew Badge.pretty")(options "")(descr ""))
+)
