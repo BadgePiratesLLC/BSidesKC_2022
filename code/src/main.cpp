@@ -13,6 +13,12 @@ int selectedBling = 0;
 int inputPosition = 0;
 static int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
 
+static bool isCode1Unlocked = false;
+static bool isCode2Unlocked = false;
+static bool isCode3Unlocked = false;
+static bool isCode4Unlocked = false;
+static bool isCode5Unlocked = false;
+static bool isCode6Unlocked = false;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
@@ -268,6 +274,11 @@ void resetUserInput()
 void checkIsValidCode()
 {
   boolean isCode1 = true;
+  boolean isCode2 = true;
+  boolean isCode3 = true;
+  boolean isCode4 = true;
+  boolean isCode5 = true;
+  boolean isCode6 = true;
   boolean isCodeJenny = true;
 
   int i = 0;
@@ -285,8 +296,44 @@ void checkIsValidCode()
     i++;
   }
 
+  i = 0;
+  while (i < 7 && isCode2)
+  {
+    isCode2 = userInput[i] == CODE_2[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCode3)
+  {
+    isCode3 = userInput[i] == CODE_3[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCode4)
+  {
+    isCode4 = userInput[i] == CODE_4[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCode5)
+  {
+    isCode5 = userInput[i] == CODE_5[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCode6)
+  {
+    isCode6 = userInput[i] == CODE_6[i];
+    i++;
+  }
+
   if (isCode1)
   {
+    isCode1Unlocked = true;
     Serial.println("CODE 1 MATCHES");
   }
 
@@ -294,6 +341,36 @@ void checkIsValidCode()
   {
     Serial.println("CODE JENNY TYPED IN");
   }
+
+  if(isCode2){
+    isCode2Unlocked = true;
+    Serial.println("CODE 2 MATCHES");
+  }
+
+  
+  if(isCode3){
+    isCode3Unlocked = true;
+    Serial.println("CODE 3 MATCHES");
+  }
+
+  
+  if(isCode4){
+    isCode4Unlocked = true;
+    Serial.println("CODE 4 MATCHES");
+  }
+
+  
+  if(isCode5){
+    isCode5Unlocked = true;
+    Serial.println("CODE 5 MATCHES");
+  }
+
+  
+  if(isCode6){
+    isCode6Unlocked = true;
+    Serial.println("CODE 6 MATCHES");
+  }
+
 }
 
 void logCode()
@@ -553,17 +630,44 @@ bool hasInputChanged()
 // TODO see about using interupts for detecting when the input changes
 void inputMode(bool hasInputChanged)
 {
+    if(isCode1Unlocked) {
+    digitalWrite(LED_B, HIGH);
+  }
+
+  if(isCode2Unlocked) {
+    digitalWrite(LED_S1, HIGH);
+  }
+
+  if(isCode3Unlocked) {
+    digitalWrite(LED_I, HIGH);
+  }
+
+  if(isCode4Unlocked) {
+    digitalWrite(LED_D, HIGH);
+  }
+
+  if(isCode5Unlocked) {
+    digitalWrite(LED_E, HIGH);
+  }
+
+  if(isCode6Unlocked) {
+    digitalWrite(LED_S2, HIGH);
+  }
+
   if (currentState == INPUT_MODE && previousState == BLING_MODE)
   {
     turnOffAllLights();
     Serial.println("doing input mode stuffz");
   }
+  
   // currently handles spinning the encoder knob and updating the numbers
   // needs to also "save" off the number when they press the button
   if (hasInputChanged)
   {
     updateNumber(lastNumber, currentNumber);
   }
+
+
 }
 
 IRAM_ATTR void checkPosition()
