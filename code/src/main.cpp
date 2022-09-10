@@ -2,53 +2,17 @@
 #include <RotaryEncoder.h>
 #include <BfButton.h>
 #include <EEPROM.h>
-
-#define PIN_IN1 13
-#define PIN_IN2 38
-#define ROTARYSTEPS 1
-#define ROTARYMIN 0
-#define ROTARYMAX 11
-
-const int LED_B = 3;
-const int LED_S1 = 34;
-const int LED_I = 4;
-const int LED_D = 33;
-const int LED_E = 5;
-const int LED_S2 = 26;
-
-const int LED_0 = 6;
-const int LED_1 = 21;
-const int LED_2 = 14;
-const int LED_3 = 35;
-const int LED_4 = 10;
-const int LED_5 = 15;
-const int LED_6 = 36;
-const int LED_7 = 11;
-const int LED_8 = 16;
-const int LED_9 = 37;
-const int LED_10 = 12;
-const int LED_11 = 17;
-
-const unsigned int ROTARY_SWITCH = 7;
-
-const bool DEBUG = false;
-const bool VERBOSE = false;
-const bool INVERT_DIR = false;
-const int INTERVAL = 500;                  // ms
-const int BLING_MODE_TIMEOUT_INTERVAL = 6; // 500ms * 2  = ~one seconds
+#include "constants.h"
 
 static int pos = 0;
 static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
+int selectedBling = 0;
 
 int inputPosition = 0;
-int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
-int code1[7] = {8, 4, 0, 0, 0, 0, 0};
-int codeJenny[7] = {8, 6, 7, 5, 3, 0, 9};
+static int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
 
-int selectedBling = 0;
-const int numBling = 2;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
@@ -282,7 +246,7 @@ RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 
 void handleBlingChange()
 {
-  if (selectedBling >= numBling - 1)
+  if (selectedBling >= NUM_BLING - 1)
   {
     selectedBling = 0;
   }
@@ -306,18 +270,18 @@ void checkIsValidCode()
   boolean isCode1 = true;
   boolean isCodeJenny = true;
 
-  long i = 0;
-  // Check code 1
+  int i = 0;
+  //Check code 1
   while (i < 7 && isCode1)
   {
-    isCode1 = userInput[i] == code1[i];
+    isCode1 = userInput[i] == CODE_1[i];
     i++;
   }
 
   i = 0;
   while (i < 7 && isCodeJenny)
   {
-    isCodeJenny = userInput[i] == codeJenny[i];
+    isCodeJenny = userInput[i] == CODE_JENNY[i];
     i++;
   }
 
