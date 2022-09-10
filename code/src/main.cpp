@@ -13,12 +13,12 @@ int selectedBling = 0;
 int inputPosition = 0;
 static int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
 
+static bool isCode0Unlocked = false;
 static bool isCode1Unlocked = false;
 static bool isCode2Unlocked = false;
 static bool isCode3Unlocked = false;
 static bool isCode4Unlocked = false;
 static bool isCode5Unlocked = false;
-static bool isCode6Unlocked = false;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
@@ -271,21 +271,23 @@ void resetUserInput()
   }
 }
 
+// TODO can probably make this better ;) 
 void checkIsValidCode()
 {
+  boolean isCode0 = true;
   boolean isCode1 = true;
   boolean isCode2 = true;
   boolean isCode3 = true;
   boolean isCode4 = true;
   boolean isCode5 = true;
-  boolean isCode6 = true;
   boolean isCodeJenny = true;
+  boolean isCodeReset = true;
 
   int i = 0;
   //Check code 1
-  while (i < 7 && isCode1)
+  while (i < 7 && isCode0)
   {
-    isCode1 = userInput[i] == CODE_1[i];
+    isCode0 = userInput[i] == CODE_0[i];
     i++;
   }
 
@@ -293,6 +295,27 @@ void checkIsValidCode()
   while (i < 7 && isCodeJenny)
   {
     isCodeJenny = userInput[i] == CODE_JENNY[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCodeReset)
+  {
+    isCodeReset = userInput[i] == CODE_RESET[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCodeJenny)
+  {
+    isCodeJenny = userInput[i] == CODE_JENNY[i];
+    i++;
+  }
+
+  i = 0;
+  while (i < 7 && isCode1)
+  {
+    isCode1 = userInput[i] == CODE_1[i];
     i++;
   }
 
@@ -324,17 +347,29 @@ void checkIsValidCode()
     i++;
   }
 
-  i = 0;
-  while (i < 7 && isCode6)
-  {
-    isCode6 = userInput[i] == CODE_6[i];
-    i++;
+  if (isCodeReset) {
+    Serial.println("Resetting EEPROM");
+    EEPROM.writeBool(0, false);
+    isCode0Unlocked = false;
+    EEPROM.writeBool(1, false);
+    isCode1Unlocked = false;
+    EEPROM.writeBool(2, false);
+    isCode2Unlocked = false;
+    EEPROM.writeBool(3, false);
+    isCode3Unlocked = false;
+    EEPROM.writeBool(4, false);
+    isCode4Unlocked = false;
+    EEPROM.writeBool(5, false);
+    isCode5Unlocked = false;
+    EEPROM.commit();
   }
 
-  if (isCode1)
+  if (isCode0)
   {
-    isCode1Unlocked = true;
-    Serial.println("CODE 1 MATCHES");
+    isCode0Unlocked = true;
+    EEPROM.writeBool(0, true);
+    Serial.println("CODE 0 MATCHES");
+    EEPROM.commit();
   }
 
   if (isCodeJenny)
@@ -342,33 +377,44 @@ void checkIsValidCode()
     Serial.println("CODE JENNY TYPED IN");
   }
 
+  if(isCode1){
+    isCode1Unlocked = true;
+    EEPROM.writeBool(1, true);
+    Serial.print("CODE 1 MATCHES:");
+    Serial.println(EEPROM.readBool(1));
+    EEPROM.commit();
+  }
+
+  
   if(isCode2){
     isCode2Unlocked = true;
+    EEPROM.writeBool(2, true);
     Serial.println("CODE 2 MATCHES");
+    EEPROM.commit();
   }
 
   
   if(isCode3){
     isCode3Unlocked = true;
+    EEPROM.writeBool(3, true);
     Serial.println("CODE 3 MATCHES");
+    EEPROM.commit();
   }
 
   
   if(isCode4){
     isCode4Unlocked = true;
+    EEPROM.writeBool(4, true);
     Serial.println("CODE 4 MATCHES");
+    EEPROM.commit();
   }
 
   
   if(isCode5){
     isCode5Unlocked = true;
+    EEPROM.writeBool(5, true);
     Serial.println("CODE 5 MATCHES");
-  }
-
-  
-  if(isCode6){
-    isCode6Unlocked = true;
-    Serial.println("CODE 6 MATCHES");
+    EEPROM.commit();
   }
 
 }
@@ -630,27 +676,27 @@ bool hasInputChanged()
 // TODO see about using interupts for detecting when the input changes
 void inputMode(bool hasInputChanged)
 {
-    if(isCode1Unlocked) {
+  if(isCode0Unlocked) {
     digitalWrite(LED_B, HIGH);
   }
 
-  if(isCode2Unlocked) {
+  if(isCode1Unlocked) {
     digitalWrite(LED_S1, HIGH);
   }
 
-  if(isCode3Unlocked) {
+  if(isCode2Unlocked) {
     digitalWrite(LED_I, HIGH);
   }
 
-  if(isCode4Unlocked) {
+  if(isCode3Unlocked) {
     digitalWrite(LED_D, HIGH);
   }
 
-  if(isCode5Unlocked) {
+  if(isCode4Unlocked) {
     digitalWrite(LED_E, HIGH);
   }
 
-  if(isCode6Unlocked) {
+  if(isCode5Unlocked) {
     digitalWrite(LED_S2, HIGH);
   }
 
@@ -659,7 +705,7 @@ void inputMode(bool hasInputChanged)
     turnOffAllLights();
     Serial.println("doing input mode stuffz");
   }
-  
+
   // currently handles spinning the encoder knob and updating the numbers
   // needs to also "save" off the number when they press the button
   if (hasInputChanged)
@@ -677,6 +723,7 @@ IRAM_ATTR void checkPosition()
 
 void setup()
 {
+  EEPROM.begin(512);
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -693,6 +740,30 @@ void setup()
   btn.onPress(pressHandler)
       .onDoublePress(pressHandler)     // default timeout
       .onPressFor(pressHandler, 1000); // custom timeout for 1 second
+
+  isCode0Unlocked = EEPROM.readBool(0);
+  Serial.print("isCode0Unlocked");
+  Serial.println(isCode0Unlocked);
+  
+  isCode1Unlocked = EEPROM.readBool(1);
+  Serial.print("isCode1Unlocked");
+  Serial.println(isCode1Unlocked);
+  
+  isCode2Unlocked = EEPROM.readBool(2);
+  Serial.print("isCode2Unlocked");
+  Serial.println(isCode2Unlocked);
+  
+  isCode3Unlocked = EEPROM.readBool(3);
+  Serial.print("isCode3Unlocked");
+  Serial.println(isCode3Unlocked);
+  
+  isCode4Unlocked = EEPROM.readBool(4);
+  Serial.print("isCode4Unlocked");
+  Serial.println(isCode4Unlocked);
+  
+  isCode5Unlocked = EEPROM.readBool(5);
+  Serial.print("isCode5Unlocked");
+  Serial.println(isCode5Unlocked);
 }
 
 void loop()
