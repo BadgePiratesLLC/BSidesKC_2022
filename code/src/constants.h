@@ -33,8 +33,19 @@ const int ROTARYMIN = 0;
 const int ROTARYMAX = 11;
 const int NUM_BLING = 2;
 
+const int CODE_0_ADDR = 0;
+const int CODE_1_ADDR = 1;
+const int CODE_2_ADDR = 2;
+const int CODE_3_ADDR = 3;
+const int CODE_4_ADDR = 4;
+const int CODE_5_ADDR = 5;
+const int CODE_JENNY_ADDR = 6;
+// leave space because we are saving strings? I dunno how it works
+const int WIFI_SSID_ADDR = 20;
+const int WIFI_PASSWORD_ADDR = 30;
+
 const int CODE_0[7] = {3, 1, 4, 1, 5, 9, 2}; // pi
-const int CODE_1[7] = {1, 2, 3, 4, 5, 0, 0}; // space balls?
+const int CODE_1[7] = {1, 2, 3, 4, 5, 0 ,0}; // space balls
 const int CODE_2[7] = {4, 2, 0, 0, 0, 0, 0}; // 42
 const int CODE_3[7] = {1, 7, 2, 0, 0, 0, 0}; // 172
 const int CODE_4[7] = {1, 3, 3, 7, 0, 0, 0}; // leet
