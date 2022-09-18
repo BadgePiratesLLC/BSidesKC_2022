@@ -67,8 +67,6 @@ void recvMsg(uint8_t *data, size_t len) {
   }
 }
 
-  Serial.println("SSID LENGTH: " + ssid.length());
-  Serial.println("PASSWORD LENGTH: " + password.length());
 void setupWifiSerial() {  
   if (password.length() == 0 && ssid.length() == 9) {
     Serial.println("Setting up wifi for the first time.");
@@ -77,11 +75,22 @@ void setupWifiSerial() {
     long time = micros();
     char passwordRaw[16];
     ltoa(time, passwordRaw, 10);
-
+    // cast it as a string
     String password = String(passwordRaw);
     int passwordLength = password.length();
-    ssid.concat(password.substring(passwordLength-3, passwordLength));
-    password.concat("-12345");
+    // uuse the last 3 of the password for the ssid
+    String uniqueSSID = password.substring(passwordLength-3, passwordLength);
+    bool success = ssid.concat(uniqueSSID);
+
+    if(!success) {
+      Serial.println("ssid + password concat was unsucessful");
+    }
+
+    password.concat("1");
+    Serial.print("Password: ");
+    Serial.println(password);
+    
+
 
     char SSID[ssid.length()+1];
     char PASSWORD[password.length()+1];
@@ -96,10 +105,12 @@ void setupWifiSerial() {
     Serial.println(PASSWORD);
     
     // save wifi password to eeprom
-    EEPROM.writeString(WIFI_SSID_ADDR, ssid);
-    EEPROM.writeString(WIFI_PASSWORD_ADDR, password);
+    EEPROM.writeString(WIFI_SSID_ADDR, SSID);
+    EEPROM.writeString(WIFI_PASSWORD_ADDR, PASSWORD);
     EEPROM.commit();
   } else {
+    Serial.println("WiFi has been setup before using existing creds.");
+    Serial.println(ssid);
     int ssidLength = ssid.length() + 1;
     int passwordLength = password.length() + 1;
     char SSID[ssidLength];
@@ -115,7 +126,7 @@ void setupWifiSerial() {
   }
   
   IPAddress IP = WiFi.softAPIP();
-  Serial.print("Web Serial: http://" + IP.toString() + "/");
+  Serial.println("Web Serial: http://" + IP.toString() + "/");
   WebSerial.begin(&server, "/");
   WebSerial.msgCallback(recvMsg);
   server.begin();
@@ -506,7 +517,7 @@ void checkIsValidCode()
 void logCode()
 {
   Serial.print("User Input: ");
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < 8; i++)
   {
     if (i < 6)
     {
@@ -834,7 +845,10 @@ void setup()
 
   String savedWifiSSID = EEPROM.readString(WIFI_SSID_ADDR);
   String savedWifiPwd = EEPROM.readString(WIFI_PASSWORD_ADDR);
-  if (savedWifiSSID.length() > 0 && savedWifiPwd.length() > 0) {
+  if (savedWifiPwd.length() > 0) {
+    Serial.print("Found existing wifi creds SSID: ");
+    Serial.println(savedWifiSSID);
+    Serial.println(savedWifiPwd);
     ssid = savedWifiSSID;
     password = savedWifiPwd;
   }
@@ -856,11 +870,12 @@ void setup()
     Serial.println(isCodeJennyUnlocked ? "true" : "false");
   }
 
+  Serial.println(HELP_MSG);
   if (isCodeJennyUnlocked) {
     setupWifiSerial();
+  } else {
+    Serial.println(JENNY_HELP_MSG);
   }
-  
-  Serial.println(HELP_MSG);
 }
 
 void loop() {
@@ -932,3 +947,4 @@ void loop() {
     inputMode(inputChanged);
   }
 }
+

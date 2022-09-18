@@ -55,5 +55,6 @@ const int CODE_5[7] = {6, 6, 6, 0, 0, 0, 0}; // mark of the devil
 const int CODE_RESET[7] = {1, 1, 1, 1, 1, 1}; // reset
 const int CODE_JENNY[7] = {8, 6, 7, 5, 3, 0, 9};
 
-const String HELP_MSG = "Thank you for coming to BSidesKC and hacking on the badge. If the wifi isn't working try calling jenny.";
+const String HELP_MSG = "Thank you for coming to BSidesKC and hacking on the badge. ";
+const String JENNY_HELP_MSG = "If the wifi isn't working try calling jenny.";
 const String CREDITS_MSG = "Building badges for fun not profit, this badge was brought to you by rixon, networkgeek, pecord, JiggleBilly, fg and CodeX.";
