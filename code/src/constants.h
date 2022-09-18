@@ -21,7 +21,7 @@ const int LED_11 = 17;
 const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
 
 const bool DEBUG = false;
-const bool VERBOSE = false;
+const bool VERBOSE = true;
 const bool INVERT_DIR = false;
 const int INTERVAL = 500;                  // ms
 const int BLING_MODE_TIMEOUT_INTERVAL = 6; // 500ms * 2  = ~one seconds
@@ -52,3 +52,6 @@ const int CODE_4[7] = {1, 3, 3, 7, 0, 0, 0}; // leet
 const int CODE_5[7] = {6, 6, 6, 0, 0, 0, 0}; // mark of the devil
 const int CODE_RESET[7] = {1, 1, 1, 1, 1, 1}; // reset
 const int CODE_JENNY[7] = {8, 6, 7, 5, 3, 0, 9};
+
+const String HELP_MSG = "Thank you for coming to BSidesKC and hacking on the badge. If the wifi isn't working try calling jenny.";
+const String CREDITS_MSG = "Building badges for fun not profit, this badge was brought to you by rixon, networkgeek, pecord, JiggleBilly, fg and CodeX.";

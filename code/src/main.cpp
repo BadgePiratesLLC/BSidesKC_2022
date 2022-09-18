@@ -361,9 +361,15 @@ void checkIsValidCode()
     isCode3Unlocked = false;
     isCode4Unlocked = false;
     isCode5Unlocked = false;
-    for (int i = 0 ; i < EEPROM.length() ; i++) {
-      EEPROM.write(i, 0);
-    }
+    EEPROM.writeBool(CODE_0_ADDR, false);
+    EEPROM.writeBool(CODE_1_ADDR, false);
+    EEPROM.writeBool(CODE_2_ADDR, false);
+    EEPROM.writeBool(CODE_3_ADDR, false);
+    EEPROM.writeBool(CODE_4_ADDR, false);
+    EEPROM.writeBool(CODE_5_ADDR, false);
+    EEPROM.writeBool(CODE_JENNY_ADDR, false);
+    EEPROM.writeString(WIFI_SSID_ADDR, "");
+    EEPROM.writeString(WIFI_PASSWORD_ADDR, "");
     EEPROM.commit();
   }
 
@@ -640,7 +646,7 @@ void readEncoder()
     pos = newPos;
   }
 
-  if (VERBOSE)
+  if (DEBUG)
   {
     Serial.print("pos:");
     Serial.print(newPos);
@@ -707,7 +713,7 @@ void inputMode(bool hasInputChanged)
   if (currentState == INPUT_MODE && previousState == BLING_MODE)
   {
     turnOffAllLights();
-    if (VERBOSE) {
+    if (DEBUG) {
       Serial.println("doing input mode stuffz");
     }
   }
@@ -731,58 +737,79 @@ static String password = "";
 
 AsyncWebServer server(80);
 /* Message callback of WebSerial */
-void recvMsg(uint8_t *data, size_t len){
-  WebSerial.println("Received Data...");
+void recvMsg(uint8_t *data, size_t len) {
   String d = "";
   for(int i=0; i < len; i++){
     d += char(data[i]);
   }
-  WebSerial.println(d);
+
+  if (d.indexOf("help") != -1) {
+    WebSerial.println("<< " + d);
+    WebSerial.println(HELP_MSG);
+    Serial.println(HELP_MSG);
+  } else if (d.indexOf("credits")) {
+    WebSerial.println("<< " + d);
+    WebSerial.println(CREDITS_MSG);
+    Serial.println(CREDITS_MSG);
+  } else {  
+    WebSerial.println("Received Data...");
+    WebSerial.println(d);
+    Serial.print(d);
+  }
 }
 
 void setupWifiSerial() {
-  delay(50);
-  long time = micros();
-  char passwordRaw[16];
-  ltoa(time, passwordRaw, 10);
-
-  String password = String(passwordRaw);
-  int passwordLength = password.length();
-  ssid.concat(password.substring(passwordLength-3, passwordLength));
-  password.concat("-12345");
-
-  Serial.print("SSID: ");
-  Serial.println(ssid);
-  Serial.print("Password: ");
-  Serial.println(password);
-
-  // save wifi password to eeprom
-  // EEPROM.writeString(WIFI_SSID_ADDR, ssid);
-  // EEPROM.writeString(WIFI_PASSWORD_ADDR, password);
-  // EEPROM.commit();
-  char SSID[ssid.length()+1];
-  char PASSWORD[password.length()+1];
+  Serial.println("SSID LENGTH: " + ssid.length());
+  Serial.println("PASSWORD LENGTH: " + password.length());
   
-  ssid.toCharArray(SSID, ssid.length()+1);
-  password.toCharArray(PASSWORD, password.length()+1);
+  // setting up wifi for first time 
+  if (password.length() == 0 && ssid.length() == 9) {
+    delay(50);
+    long time = micros();
+    char passwordRaw[16];
+    ltoa(time, passwordRaw, 10);
 
+    String password = String(passwordRaw);
+    int passwordLength = password.length();
+    ssid.concat(password.substring(passwordLength-3, passwordLength));
+    password.concat("-12345");
 
-  Serial.print("SSID: ");
-  Serial.println(SSID);
-  Serial.print("Password: ");
-  Serial.println(PASSWORD);
+    char SSID[ssid.length()+1];
+    char PASSWORD[password.length()+1];
+    
+    ssid.toCharArray(SSID, ssid.length()+1);
+    password.toCharArray(PASSWORD, password.length()+1);
+    WiFi.softAP(SSID, PASSWORD);
 
-  WiFi.softAP(SSID, PASSWORD);
+    Serial.print("SSID: ");
+    Serial.println(SSID);
+    Serial.print("Password: ");
+    Serial.println(PASSWORD);
+    
+    // save wifi password to eeprom
+    EEPROM.writeString(WIFI_SSID_ADDR, ssid);
+    EEPROM.writeString(WIFI_PASSWORD_ADDR, password);
+    EEPROM.commit();
+  } else {
+    int ssidLength = ssid.length() + 1;
+    int passwordLength = password.length() + 1;
+    char SSID[ssidLength];
+    char PASSWORD[passwordLength];
+    ssid.toCharArray(SSID, ssidLength);
+    password.toCharArray(PASSWORD, passwordLength);
+    WiFi.softAP(SSID, PASSWORD);
+
+    Serial.print("SSID: ");
+    Serial.println(SSID);
+    Serial.print("Password: ");
+    Serial.println(PASSWORD);
+  }
   
   IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
-  // WebSerial is accessible at "<IP Address>/webserial" in browser
+  Serial.print("Web Serial: http://" + IP.toString() + "/");
   WebSerial.begin(&server, "/");
-  /* Attach Message Callback */
   WebSerial.msgCallback(recvMsg);
   server.begin();
-
 }
 
 void setup()
@@ -813,10 +840,10 @@ void setup()
 
   String savedWifiSSID = EEPROM.readString(WIFI_SSID_ADDR);
   String savedWifiPwd = EEPROM.readString(WIFI_PASSWORD_ADDR);
-  Serial.print("saved wifi ssid: ");
-  Serial.println(savedWifiPwd);
-  Serial.print("saved wifi pass: ");
-  Serial.println(savedWifiPwd);
+  if (savedWifiSSID.length() > 0 && savedWifiPwd.length() > 0) {
+    ssid = savedWifiSSID;
+    password = savedWifiPwd;
+  }
 
   if (VERBOSE) {
     Serial.print("isCode0Unlocked: ");
@@ -831,8 +858,14 @@ void setup()
     Serial.println(isCode5Unlocked ? "true" : "false");
     Serial.print("isCode4Unlocked: ");
     Serial.println(isCode4Unlocked ? "true" : "false");
+    Serial.print("isCodeJennyUnlocked: ");
+    Serial.println(isCodeJennyUnlocked ? "true" : "false");
   }
-  setupWifiSerial();
+
+  if (isCodeJennyUnlocked) {
+    setupWifiSerial();
+  }
+  
 
 }
 
