@@ -376,53 +376,49 @@ void checkIsValidCode()
   if (isCode0)
   {
     isCode0Unlocked = true;
-    EEPROM.writeBool(CODE_0_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_0_ADDR, isCode0Unlocked);
     Serial.println("CODE 0 MATCHES");
   }
 
   if (isCodeJenny)
   {
     isCodeJennyUnlocked = true;
-    EEPROM.writeBool(CODE_JENNY_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_JENNY_ADDR, isCodeJennyUnlocked);
     Serial.println("CODE JENNY TYPED IN");
   }
 
   if(isCode1){
     isCode1Unlocked = true;
-    EEPROM.writeBool(CODE_1_ADDR, true);
-    Serial.println(EEPROM.readBool(1));
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_1_ADDR, isCode1Unlocked);
     Serial.print("CODE 1 MATCHES:");
   }
   
   if(isCode2){
     isCode2Unlocked = true;
-    EEPROM.writeBool(CODE_2_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_2_ADDR, isCode2Unlocked);
     Serial.println("CODE 2 MATCHES");
   }
 
   if(isCode3){
     isCode3Unlocked = true;
-    EEPROM.writeBool(CODE_3_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_3_ADDR, isCode3Unlocked);
     Serial.println("CODE 3 MATCHES");
   }
 
   if(isCode4){
     isCode4Unlocked = true;
-    EEPROM.writeBool(CODE_4_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_4_ADDR, isCode4Unlocked);
     Serial.println("CODE 4 MATCHES");
   }
 
   if(isCode5){
     isCode5Unlocked = true;
-    EEPROM.writeBool(CODE_5_ADDR, true);
-    EEPROM.commit();
+    EEPROM.writeBool(CODE_5_ADDR, isCode5Unlocked);
     Serial.println("CODE 5 MATCHES");
+  }
+
+  if (isCode0 || isCode1 || isCode2 || isCode3 || isCode4 || isCode5 || isCodeJennyUnlocked) {
+    EEPROM.commit();
   }
 
 }
