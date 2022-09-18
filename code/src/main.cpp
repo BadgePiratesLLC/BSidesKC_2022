@@ -841,7 +841,7 @@ void setup()
     password = savedWifiPwd;
   }
 
-  if (VERBOSE) {
+  if (DEBUG) {
     Serial.print("isCode0Unlocked: ");
     Serial.println(isCode0Unlocked ? "true" : "false");
     Serial.print("isCode1Unlocked: ");
@@ -862,7 +862,7 @@ void setup()
     setupWifiSerial();
   }
   
-
+  Serial.println(HELP_MSG);
 }
 
 void loop()
