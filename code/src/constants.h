@@ -43,7 +43,7 @@ const int CODE_4_ADDR = 4;
 const int CODE_5_ADDR = 5;
 const int CODE_JENNY_ADDR = 6;
 // leave space because we are saving strings? I dunno how it works
-const int WIFI_SSID_ADDR = 20;
+const int WIFI_SSID_ADDR = 50;
 const int WIFI_PASSWORD_ADDR = 30;
 
 const int CODE_0[7] = {3, 1, 4, 1, 5, 9, 2}; // pi

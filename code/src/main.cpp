@@ -67,12 +67,12 @@ void recvMsg(uint8_t *data, size_t len) {
   }
 }
 
-void setupWifiSerial() {
   Serial.println("SSID LENGTH: " + ssid.length());
   Serial.println("PASSWORD LENGTH: " + password.length());
-  
-  // setting up wifi for first time 
+void setupWifiSerial() {  
   if (password.length() == 0 && ssid.length() == 9) {
+    Serial.println("Setting up wifi for the first time.");
+    // we need a unique SSID and PW for each badge, use micros to get a random time offset for the PW
     delay(50);
     long time = micros();
     char passwordRaw[16];
