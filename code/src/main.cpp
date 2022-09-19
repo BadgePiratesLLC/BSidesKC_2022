@@ -54,8 +54,8 @@ void recvMsg(uint8_t *data, size_t len) {
 
   if (d.indexOf("help") != -1) {
     WebSerial.println("<< " + d);
-    WebSerial.println(HELP_MSG);
-    Serial.println(HELP_MSG);
+    WebSerial.println(HELP_MSG + " " + JENNY_HELP_MSG);
+    Serial.println(HELP_MSG + " " + JENNY_HELP_MSG);
   } else if (d.indexOf("credits")) {
     WebSerial.println("<< " + d);
     WebSerial.println(CREDITS_MSG);
@@ -82,16 +82,7 @@ void setupWifiSerial() {
     String uniqueSSID = password.substring(passwordLength-3, passwordLength);
     bool success = ssid.concat(uniqueSSID);
 
-    if(!success) {
-      Serial.println("ssid + password concat was unsucessful");
-    }
-
     password.concat("1");
-    Serial.print("Password: ");
-    Serial.println(password);
-    
-
-
     char SSID[ssid.length()+1];
     char PASSWORD[password.length()+1];
     
@@ -109,8 +100,7 @@ void setupWifiSerial() {
     EEPROM.writeString(WIFI_PASSWORD_ADDR, PASSWORD);
     EEPROM.commit();
   } else {
-    Serial.println("WiFi has been setup before using existing creds.");
-    Serial.println(ssid);
+    Serial.println("Jenny is fixing the wifi...");
     int ssidLength = ssid.length() + 1;
     int passwordLength = password.length() + 1;
     char SSID[ssidLength];
@@ -846,9 +836,13 @@ void setup()
   String savedWifiSSID = EEPROM.readString(WIFI_SSID_ADDR);
   String savedWifiPwd = EEPROM.readString(WIFI_PASSWORD_ADDR);
   if (savedWifiPwd.length() > 0) {
-    Serial.print("Found existing wifi creds SSID: ");
-    Serial.println(savedWifiSSID);
-    Serial.println(savedWifiPwd);
+    if (DEBUG) {
+      Serial.print("Found existing wifi creds");
+      Serial.print("SSID: ");
+      Serial.println(savedWifiSSID);
+      Serial.print("Password: ");
+      Serial.println(savedWifiPwd);
+    }
     ssid = savedWifiSSID;
     password = savedWifiPwd;
   }
