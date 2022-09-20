@@ -15,6 +15,7 @@ static int lastNumber = 0;
 int selectedBling = 0;
 
 int inputPosition = 0;
+int userInputLength = 7;
 static int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
 
 static bool isCode0Unlocked = false;
@@ -39,12 +40,46 @@ enum ProgramState currentState = INPUT_MODE;
 
 unsigned long previousTime = 0;
 unsigned long currentTime = 0;
+unsigned long lastWifiMsgTimeMs = 0;
 int numIntervalsWithoutInput = 0;
 bool hasInputChangedDuringInterval = false;
+bool wifiSerialOn = false;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
 
 AsyncWebServer server(80);
+
+// helper methods
+// wraps both serial and web serial println methods 
+// so we don't always have to call (or forget)
+void SerialPrintln(String msg) {
+  if (wifiSerialOn) {
+    WebSerial.println(msg);
+  }
+  Serial.println(msg);
+}
+
+void SerialPrintln(int msg) {
+  if (wifiSerialOn) {
+    WebSerial.println(msg);
+  }
+  Serial.println(msg);
+}
+
+void SerialPrint(String msg) {
+  if (wifiSerialOn) {
+    WebSerial.print(msg);
+  }
+  Serial.print(msg);
+}
+
+void SerialPrint(int msg) {
+  if (wifiSerialOn) {
+    WebSerial.print(msg);
+  }
+  Serial.print(msg);
+}
+
 /* Message callback of WebSerial */
 void recvMsg(uint8_t *data, size_t len) {
   String d = "";
@@ -53,23 +88,22 @@ void recvMsg(uint8_t *data, size_t len) {
   }
 
   if (d.indexOf("help") != -1) {
-    WebSerial.println("<< " + d);
-    WebSerial.println(HELP_MSG + " " + JENNY_HELP_MSG);
-    Serial.println(HELP_MSG + " " + JENNY_HELP_MSG);
+    SerialPrintln("<< " + d);
+    SerialPrintln(HELP_MSG + " " + JENNY_HELP_MSG);
   } else if (d.indexOf("credits")) {
-    WebSerial.println("<< " + d);
-    WebSerial.println(CREDITS_MSG);
-    Serial.println(CREDITS_MSG);
+    SerialPrintln("<< " + d);
+    SerialPrintln(CREDITS_MSG);
   } else {  
-    WebSerial.println("Received Data...");
-    WebSerial.println(d);
-    Serial.print(d);
+    SerialPrintln("Received Data...");
+    SerialPrintln(d);
   }
+
+  lastWifiMsgTimeMs = millis();
 }
 
 void setupWifiSerial() {  
   if (password.length() == 0 && ssid.length() == 9) {
-    Serial.println("Setting up wifi for the first time.");
+    Serial.println("Setting up wifi for the first time...");
     // we need a unique SSID and PW for each badge, use micros to get a random time offset for the PW
     delay(50);
     long time = micros();
@@ -81,7 +115,6 @@ void setupWifiSerial() {
     // uuse the last 3 of the password for the ssid
     String uniqueSSID = password.substring(passwordLength-3, passwordLength);
     bool success = ssid.concat(uniqueSSID);
-
     password.concat("1");
     char SSID[ssid.length()+1];
     char PASSWORD[password.length()+1];
@@ -90,17 +123,17 @@ void setupWifiSerial() {
     password.toCharArray(PASSWORD, password.length()+1);
     WiFi.softAP(SSID, PASSWORD);
 
-    Serial.print("SSID: ");
-    Serial.println(SSID);
-    Serial.print("Password: ");
-    Serial.println(PASSWORD);
+    SerialPrint("SSID: ");
+    SerialPrintln(SSID);
+    SerialPrint("Password: ");
+    SerialPrintln(PASSWORD);
     
     // save wifi password to eeprom
     EEPROM.writeString(WIFI_SSID_ADDR, SSID);
     EEPROM.writeString(WIFI_PASSWORD_ADDR, PASSWORD);
     EEPROM.commit();
   } else {
-    Serial.println("Jenny is fixing the wifi...");
+    SerialPrintln("Jenny is fixing the wifi...");
     int ssidLength = ssid.length() + 1;
     int passwordLength = password.length() + 1;
     char SSID[ssidLength];
@@ -109,10 +142,10 @@ void setupWifiSerial() {
     password.toCharArray(PASSWORD, passwordLength);
     WiFi.softAP(SSID, PASSWORD);
 
-    Serial.print("SSID: ");
-    Serial.println(SSID);
-    Serial.print("Password: ");
-    Serial.println(PASSWORD);
+    SerialPrint("SSID: ");
+    SerialPrintln(SSID);
+    SerialPrint("Password: ");
+    SerialPrintln(PASSWORD);
   }
   
   IPAddress IP = WiFi.softAPIP();
@@ -120,6 +153,8 @@ void setupWifiSerial() {
   WebSerial.begin(&server, "/");
   WebSerial.msgCallback(recvMsg);
   server.begin();
+  wifiSerialOn = true;
+  lastWifiMsgTimeMs = millis();
 }
 
 class Flasher
@@ -351,7 +386,7 @@ void handleBlingChange()
 void resetUserInput()
 {
   inputPosition = 0;
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < userInputLength; i++)
   {
     userInput[i] = 0;
   }
@@ -371,63 +406,63 @@ void checkIsValidCode()
 
   int i = 0;
   //Check code 1
-  while (i < 7 && isCode0)
+  while (i < userInputLength && isCode0)
   {
     isCode0 = userInput[i] == CODE_0[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeJenny)
+  while (i < userInputLength && isCodeJenny)
   {
     isCodeJenny = userInput[i] == CODE_JENNY[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeReset)
+  while (i < userInputLength && isCodeReset)
   {
     isCodeReset = userInput[i] == CODE_RESET[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeJenny)
+  while (i < userInputLength && isCodeJenny)
   {
     isCodeJenny = userInput[i] == CODE_JENNY[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode1)
+  while (i < userInputLength && isCode1)
   {
     isCode1 = userInput[i] == CODE_1[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode2)
+  while (i < userInputLength && isCode2)
   {
     isCode2 = userInput[i] == CODE_2[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode3)
+  while (i < userInputLength && isCode3)
   {
     isCode3 = userInput[i] == CODE_3[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode4)
+  while (i < userInputLength && isCode4)
   {
     isCode4 = userInput[i] == CODE_4[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode5)
+  while (i < userInputLength && isCode5)
   {
     isCode5 = userInput[i] == CODE_5[i];
     i++;
@@ -506,15 +541,12 @@ void checkIsValidCode()
 
 void logCode()
 {
-  Serial.print("User Input: ");
-  for (int i = 0; i < 8; i++)
+  SerialPrint("User Input: ");
+  for (int i = 0; i < userInputLength; i++)
   {
-    if (i < 6)
-    {
-      Serial.print(userInput[i]);
-    }
+    SerialPrint(userInput[i]);
   }
-  Serial.println("");
+  SerialPrintln("");
 }
 
 void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
@@ -532,7 +564,7 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
       userInput[inputPosition] = currentNumber;
       logCode();
       checkIsValidCode();
-      if (inputPosition < 6)
+      if (inputPosition < userInputLength)
       {
         inputPosition++;
       }
@@ -864,11 +896,15 @@ void setup()
     Serial.println(isCodeJennyUnlocked ? "true" : "false");
   }
 
-  Serial.println(HELP_MSG);
+  SerialPrintln(HELP_MSG);
   if (isCodeJennyUnlocked) {
     setupWifiSerial();
   } else {
-    Serial.println(JENNY_HELP_MSG);
+    SerialPrintln(JENNY_HELP_MSG);
+  }
+
+  if (isCode0Unlocked || isCode2Unlocked || isCode3Unlocked || isCode4Unlocked || isCode5Unlocked || isCodeJennyUnlocked) {
+    SerialPrintln(SPACE_BALLS_MSG);
   }
 }
 
@@ -939,6 +975,16 @@ void loop() {
     break;
   default:
     inputMode(inputChanged);
+  }
+
+  if (isCodeJennyUnlocked && lastWifiMsgTimeMs != 0) {
+    unsigned long timeSinceLastWifiMsgInMs = millis() - lastWifiMsgTimeMs;
+    if (timeSinceLastWifiMsgInMs >= 60000 && wifiSerialOn) { 
+      SerialPrintln("Last message recieved on wifi more than one minute ago, turning off wifi, you can reset the badge to turn it back on.");
+      WiFi.disconnect(true);
+      server.end();
+      wifiSerialOn = false;
+    }
   }
 }
 
