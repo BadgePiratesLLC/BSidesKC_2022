@@ -3,6 +3,10 @@
 #include <BfButton.h>
 #include <EEPROM.h>
 #include "constants.h"
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSerial.h>
 
 static int pos = 0;
 static int dir = 0;
@@ -11,6 +15,7 @@ static int lastNumber = 0;
 int selectedBling = 0;
 
 int inputPosition = 0;
+int userInputLength = 7;
 static int userInput[7] = {0, 0, 0, 0, 0, 0, 0};
 
 static bool isCode0Unlocked = false;
@@ -19,8 +24,138 @@ static bool isCode2Unlocked = false;
 static bool isCode3Unlocked = false;
 static bool isCode4Unlocked = false;
 static bool isCode5Unlocked = false;
+static bool isCodeJennyUnlocked = false;
+
+static String ssid = "BSidesKC-";
+static String password = "";
+
+enum ProgramState
+{
+  BLING_MODE = 0,
+  INPUT_MODE = 1
+};
+
+enum ProgramState previousState = INPUT_MODE;
+enum ProgramState currentState = INPUT_MODE;
+
+unsigned long previousTime = 0;
+unsigned long currentTime = 0;
+unsigned long lastWifiMsgTimeMs = 0;
+int numIntervalsWithoutInput = 0;
+bool hasInputChangedDuringInterval = false;
+bool wifiSerialOn = false;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
+
+AsyncWebServer server(80);
+
+// helper methods
+// wraps both serial and web serial println methods 
+// so we don't always have to call (or forget)
+void SerialPrintln(String msg) {
+  if (wifiSerialOn) {
+    WebSerial.println(msg);
+  }
+  Serial.println(msg);
+}
+
+void SerialPrintln(int msg) {
+  if (wifiSerialOn) {
+    WebSerial.println(msg);
+  }
+  Serial.println(msg);
+}
+
+void SerialPrint(String msg) {
+  if (wifiSerialOn) {
+    WebSerial.print(msg);
+  }
+  Serial.print(msg);
+}
+
+void SerialPrint(int msg) {
+  if (wifiSerialOn) {
+    WebSerial.print(msg);
+  }
+  Serial.print(msg);
+}
+
+/* Message callback of WebSerial */
+void recvMsg(uint8_t *data, size_t len) {
+  String d = "";
+  for(int i=0; i < len; i++){
+    d += char(data[i]);
+  }
+
+  if (d.indexOf("help") != -1) {
+    SerialPrintln("<< " + d);
+    SerialPrintln(HELP_MSG + " " + JENNY_HELP_MSG);
+  } else if (d.indexOf("credits")) {
+    SerialPrintln("<< " + d);
+    SerialPrintln(CREDITS_MSG);
+  } else {  
+    SerialPrintln("Received Data...");
+    SerialPrintln(d);
+  }
+
+  lastWifiMsgTimeMs = millis();
+}
+
+void setupWifiSerial() {  
+  if (password.length() == 0 && ssid.length() == 9) {
+    Serial.println("Setting up wifi for the first time...");
+    // we need a unique SSID and PW for each badge, use micros to get a random time offset for the PW
+    delay(50);
+    long time = micros();
+    char passwordRaw[16];
+    ltoa(time, passwordRaw, 10);
+    // cast it as a string
+    String password = String(passwordRaw);
+    int passwordLength = password.length();
+    // uuse the last 3 of the password for the ssid
+    String uniqueSSID = password.substring(passwordLength-3, passwordLength);
+    bool success = ssid.concat(uniqueSSID);
+    password.concat("1");
+    char SSID[ssid.length()+1];
+    char PASSWORD[password.length()+1];
+    
+    ssid.toCharArray(SSID, ssid.length()+1);
+    password.toCharArray(PASSWORD, password.length()+1);
+    WiFi.softAP(SSID, PASSWORD);
+
+    SerialPrint("SSID: ");
+    SerialPrintln(SSID);
+    SerialPrint("Password: ");
+    SerialPrintln(PASSWORD);
+    
+    // save wifi password to eeprom
+    EEPROM.writeString(WIFI_SSID_ADDR, SSID);
+    EEPROM.writeString(WIFI_PASSWORD_ADDR, PASSWORD);
+    EEPROM.commit();
+  } else {
+    SerialPrintln("Jenny is fixing the wifi...");
+    int ssidLength = ssid.length() + 1;
+    int passwordLength = password.length() + 1;
+    char SSID[ssidLength];
+    char PASSWORD[passwordLength];
+    ssid.toCharArray(SSID, ssidLength);
+    password.toCharArray(PASSWORD, passwordLength);
+    WiFi.softAP(SSID, PASSWORD);
+
+    SerialPrint("SSID: ");
+    SerialPrintln(SSID);
+    SerialPrint("Password: ");
+    SerialPrintln(PASSWORD);
+  }
+  
+  IPAddress IP = WiFi.softAPIP();
+  Serial.println("Web Serial: http://" + IP.toString() + "/");
+  WebSerial.begin(&server, "/");
+  WebSerial.msgCallback(recvMsg);
+  server.begin();
+  wifiSerialOn = true;
+  lastWifiMsgTimeMs = millis();
+}
 
 class Flasher
 {
@@ -232,21 +367,7 @@ public:
   }
 };
 
-enum ProgramState
-{
-  BLING_MODE = 0,
-  INPUT_MODE = 1
-};
-
-enum ProgramState previousState = INPUT_MODE;
-enum ProgramState currentState = INPUT_MODE;
-
-unsigned long previousTime = 0;
-unsigned long currentTime = 0;
-int numIntervalsWithoutInput = 0;
-bool hasInputChangedDuringInterval = false;
 Flasher led1 = Flasher();
-
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 
@@ -265,7 +386,7 @@ void handleBlingChange()
 void resetUserInput()
 {
   inputPosition = 0;
-  for (int i = 0; i < 7; i++)
+  for (int i = 0; i < userInputLength; i++)
   {
     userInput[i] = 0;
   }
@@ -285,63 +406,63 @@ void checkIsValidCode()
 
   int i = 0;
   //Check code 1
-  while (i < 7 && isCode0)
+  while (i < userInputLength && isCode0)
   {
     isCode0 = userInput[i] == CODE_0[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeJenny)
+  while (i < userInputLength && isCodeJenny)
   {
     isCodeJenny = userInput[i] == CODE_JENNY[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeReset)
+  while (i < userInputLength && isCodeReset)
   {
     isCodeReset = userInput[i] == CODE_RESET[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCodeJenny)
+  while (i < userInputLength && isCodeJenny)
   {
     isCodeJenny = userInput[i] == CODE_JENNY[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode1)
+  while (i < userInputLength && isCode1)
   {
     isCode1 = userInput[i] == CODE_1[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode2)
+  while (i < userInputLength && isCode2)
   {
     isCode2 = userInput[i] == CODE_2[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode3)
+  while (i < userInputLength && isCode3)
   {
     isCode3 = userInput[i] == CODE_3[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode4)
+  while (i < userInputLength && isCode4)
   {
     isCode4 = userInput[i] == CODE_4[i];
     i++;
   }
 
   i = 0;
-  while (i < 7 && isCode5)
+  while (i < userInputLength && isCode5)
   {
     isCode5 = userInput[i] == CODE_5[i];
     i++;
@@ -349,71 +470,70 @@ void checkIsValidCode()
 
   if (isCodeReset) {
     Serial.println("Resetting EEPROM");
-    EEPROM.writeBool(0, false);
     isCode0Unlocked = false;
-    EEPROM.writeBool(1, false);
     isCode1Unlocked = false;
-    EEPROM.writeBool(2, false);
     isCode2Unlocked = false;
-    EEPROM.writeBool(3, false);
     isCode3Unlocked = false;
-    EEPROM.writeBool(4, false);
     isCode4Unlocked = false;
-    EEPROM.writeBool(5, false);
     isCode5Unlocked = false;
+    EEPROM.writeBool(CODE_0_ADDR, false);
+    EEPROM.writeBool(CODE_1_ADDR, false);
+    EEPROM.writeBool(CODE_2_ADDR, false);
+    EEPROM.writeBool(CODE_3_ADDR, false);
+    EEPROM.writeBool(CODE_4_ADDR, false);
+    EEPROM.writeBool(CODE_5_ADDR, false);
+    EEPROM.writeBool(CODE_JENNY_ADDR, false);
+    EEPROM.writeString(WIFI_SSID_ADDR, "");
+    EEPROM.writeString(WIFI_PASSWORD_ADDR, "");
     EEPROM.commit();
   }
 
   if (isCode0)
   {
     isCode0Unlocked = true;
-    EEPROM.writeBool(0, true);
+    EEPROM.writeBool(CODE_0_ADDR, isCode0Unlocked);
     Serial.println("CODE 0 MATCHES");
-    EEPROM.commit();
   }
 
   if (isCodeJenny)
   {
+    isCodeJennyUnlocked = true;
+    EEPROM.writeBool(CODE_JENNY_ADDR, isCodeJennyUnlocked);
     Serial.println("CODE JENNY TYPED IN");
+    setupWifiSerial();
   }
 
   if(isCode1){
     isCode1Unlocked = true;
-    EEPROM.writeBool(1, true);
+    EEPROM.writeBool(CODE_1_ADDR, isCode1Unlocked);
     Serial.print("CODE 1 MATCHES:");
-    Serial.println(EEPROM.readBool(1));
-    EEPROM.commit();
   }
-
   
   if(isCode2){
     isCode2Unlocked = true;
-    EEPROM.writeBool(2, true);
+    EEPROM.writeBool(CODE_2_ADDR, isCode2Unlocked);
     Serial.println("CODE 2 MATCHES");
-    EEPROM.commit();
   }
 
-  
   if(isCode3){
     isCode3Unlocked = true;
-    EEPROM.writeBool(3, true);
+    EEPROM.writeBool(CODE_3_ADDR, isCode3Unlocked);
     Serial.println("CODE 3 MATCHES");
-    EEPROM.commit();
   }
 
-  
   if(isCode4){
     isCode4Unlocked = true;
-    EEPROM.writeBool(4, true);
+    EEPROM.writeBool(CODE_4_ADDR, isCode4Unlocked);
     Serial.println("CODE 4 MATCHES");
-    EEPROM.commit();
   }
 
-  
   if(isCode5){
     isCode5Unlocked = true;
-    EEPROM.writeBool(5, true);
+    EEPROM.writeBool(CODE_5_ADDR, isCode5Unlocked);
     Serial.println("CODE 5 MATCHES");
+  }
+
+  if (isCode0 || isCode1 || isCode2 || isCode3 || isCode4 || isCode5 || isCodeJennyUnlocked) {
     EEPROM.commit();
   }
 
@@ -421,18 +541,12 @@ void checkIsValidCode()
 
 void logCode()
 {
-  for (int i = 0; i < 7; i++)
+  SerialPrint("User Input: ");
+  for (int i = 0; i < userInputLength; i++)
   {
-    if (i < 6)
-    {
-      Serial.printf("%d,", userInput[i]);
-    }
-    else
-    {
-      Serial.printf("%d", userInput[i]);
-    }
+    SerialPrint(userInput[i]);
   }
-  Serial.println("");
+  SerialPrintln("");
 }
 
 void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
@@ -450,7 +564,7 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
       userInput[inputPosition] = currentNumber;
       logCode();
       checkIsValidCode();
-      if (inputPosition < 6)
+      if (inputPosition < userInputLength)
       {
         inputPosition++;
       }
@@ -638,7 +752,7 @@ void readEncoder()
     pos = newPos;
   }
 
-  if (VERBOSE)
+  if (DEBUG)
   {
     Serial.print("pos:");
     Serial.print(newPos);
@@ -654,7 +768,9 @@ void blingMode(unsigned long currentTime)
   {
     resetUserInput();
     turnOffAllLights();
-    Serial.println("doing bling mode stuffz");
+    if (DEBUG) {
+      Serial.println("doing bling mode stuffz");
+    }
   }
   led1.Update(currentTime);
 }
@@ -703,7 +819,9 @@ void inputMode(bool hasInputChanged)
   if (currentState == INPUT_MODE && previousState == BLING_MODE)
   {
     turnOffAllLights();
-    Serial.println("doing input mode stuffz");
+    if (DEBUG) {
+      Serial.println("doing input mode stuffz");
+    }
   }
 
   // currently handles spinning the encoder knob and updating the numbers
@@ -725,8 +843,6 @@ void setup()
 {
   EEPROM.begin(512);
   Serial.begin(115200);
-  while (!Serial)
-    ;
   encoder.setPosition(0 / ROTARYSTEPS);
   pullDownAllPins();
   turnOffAllLights();
@@ -741,33 +857,58 @@ void setup()
       .onDoublePress(pressHandler)     // default timeout
       .onPressFor(pressHandler, 1000); // custom timeout for 1 second
 
-  isCode0Unlocked = EEPROM.readBool(0);
-  Serial.print("isCode0Unlocked");
-  Serial.println(isCode0Unlocked);
-  
-  isCode1Unlocked = EEPROM.readBool(1);
-  Serial.print("isCode1Unlocked");
-  Serial.println(isCode1Unlocked);
-  
-  isCode2Unlocked = EEPROM.readBool(2);
-  Serial.print("isCode2Unlocked");
-  Serial.println(isCode2Unlocked);
-  
-  isCode3Unlocked = EEPROM.readBool(3);
-  Serial.print("isCode3Unlocked");
-  Serial.println(isCode3Unlocked);
-  
-  isCode4Unlocked = EEPROM.readBool(4);
-  Serial.print("isCode4Unlocked");
-  Serial.println(isCode4Unlocked);
-  
-  isCode5Unlocked = EEPROM.readBool(5);
-  Serial.print("isCode5Unlocked");
-  Serial.println(isCode5Unlocked);
+  isCode0Unlocked = EEPROM.readBool(CODE_0_ADDR);  
+  isCode1Unlocked = EEPROM.readBool(CODE_1_ADDR);
+  isCode2Unlocked = EEPROM.readBool(CODE_2_ADDR);  
+  isCode3Unlocked = EEPROM.readBool(CODE_3_ADDR);  
+  isCode4Unlocked = EEPROM.readBool(CODE_4_ADDR);  
+  isCode5Unlocked = EEPROM.readBool(CODE_5_ADDR);
+  isCodeJennyUnlocked = EEPROM.readBool(CODE_JENNY_ADDR);
+
+  String savedWifiSSID = EEPROM.readString(WIFI_SSID_ADDR);
+  String savedWifiPwd = EEPROM.readString(WIFI_PASSWORD_ADDR);
+  if (savedWifiPwd.length() > 0) {
+    if (DEBUG) {
+      Serial.print("Found existing wifi creds");
+      Serial.print("SSID: ");
+      Serial.println(savedWifiSSID);
+      Serial.print("Password: ");
+      Serial.println(savedWifiPwd);
+    }
+    ssid = savedWifiSSID;
+    password = savedWifiPwd;
+  }
+
+  if (DEBUG) {
+    Serial.print("isCode0Unlocked: ");
+    Serial.println(isCode0Unlocked ? "true" : "false");
+    Serial.print("isCode1Unlocked: ");
+    Serial.println(isCode1Unlocked ? "true" : "false");
+    Serial.print("isCode2Unlocked: ");
+    Serial.println(isCode2Unlocked ? "true" : "false");
+    Serial.print("isCode3Unlocked: ");
+    Serial.println(isCode3Unlocked ? "true" : "false");
+    Serial.print("isCode5Unlocked: ");
+    Serial.println(isCode5Unlocked ? "true" : "false");
+    Serial.print("isCode4Unlocked: ");
+    Serial.println(isCode4Unlocked ? "true" : "false");
+    Serial.print("isCodeJennyUnlocked: ");
+    Serial.println(isCodeJennyUnlocked ? "true" : "false");
+  }
+
+  SerialPrintln(HELP_MSG);
+  if (isCodeJennyUnlocked) {
+    setupWifiSerial();
+  } else {
+    SerialPrintln(JENNY_HELP_MSG);
+  }
+
+  if (isCode0Unlocked || isCode2Unlocked || isCode3Unlocked || isCode4Unlocked || isCode5Unlocked || isCodeJennyUnlocked) {
+    SerialPrintln(SPACE_BALLS_MSG);
+  }
 }
 
-void loop()
-{
+void loop() {
   encoder.tick();
   btn.read();
 
@@ -835,4 +976,15 @@ void loop()
   default:
     inputMode(inputChanged);
   }
+
+  if (isCodeJennyUnlocked && lastWifiMsgTimeMs != 0) {
+    unsigned long timeSinceLastWifiMsgInMs = millis() - lastWifiMsgTimeMs;
+    if (timeSinceLastWifiMsgInMs >= 60000 && wifiSerialOn) { 
+      SerialPrintln("Last message recieved on wifi more than one minute ago, turning off wifi, you can reset the badge to turn it back on.");
+      WiFi.disconnect(true);
+      server.end();
+      wifiSerialOn = false;
+    }
+  }
 }
+
