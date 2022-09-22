@@ -1,3 +1,9 @@
+#pragma once
+
+#include <Arduino.h>
+
+const int version = 0;
+
 const int LED_B = 3;
 const int LED_S1 = 34;
 const int LED_I = 4;
@@ -42,6 +48,7 @@ const int CODE_3_ADDR = 3;
 const int CODE_4_ADDR = 4;
 const int CODE_5_ADDR = 5;
 const int CODE_JENNY_ADDR = 6;
+
 // leave space because we are saving strings? I dunno how it works
 const int WIFI_SSID_ADDR = 50;
 const int WIFI_PASSWORD_ADDR = 30;

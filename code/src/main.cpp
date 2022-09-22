@@ -1,12 +1,15 @@
 #include <Arduino.h>
-#include <RotaryEncoder.h>
+#include <AsyncTCP.h>
 #include <BfButton.h>
 #include <EEPROM.h>
-#include "constants.h"
-#include <WiFi.h>
-#include <AsyncTCP.h>
+#include "WebServer.h"
 #include <ESPAsyncWebServer.h>
+#include <RotaryEncoder.h>
+#include <WiFi.h>
 #include <WebSerial.h>
+
+#include "constants.hpp"
+#include "ota.hpp"
 
 static int pos = 0;
 static int dir = 0;
@@ -28,6 +31,8 @@ static bool isCodeJennyUnlocked = false;
 
 static String ssid = "BSidesKC-";
 static String password = "";
+
+OTA updater;
 
 enum ProgramState
 {
@@ -121,6 +126,7 @@ void setupWifiSerial() {
     
     ssid.toCharArray(SSID, ssid.length()+1);
     password.toCharArray(PASSWORD, password.length()+1);
+    WiFi.mode(WIFI_AP);
     WiFi.softAP(SSID, PASSWORD);
 
     SerialPrint("SSID: ");
@@ -906,6 +912,7 @@ void setup()
   if (isCode0Unlocked || isCode2Unlocked || isCode3Unlocked || isCode4Unlocked || isCode5Unlocked || isCodeJennyUnlocked) {
     SerialPrintln(SPACE_BALLS_MSG);
   }
+
 }
 
 void loop() {
