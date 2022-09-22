@@ -2,8 +2,8 @@
 #include "constants.hpp" // Not what you're supposed to do but I want intellicode or whatever it's named to shut up.
 
 // I hate doing this but I don't want to waste an hour fixing it.
-const char *WIFI_OTA_SSID PROGMEM = "Plecks Poud";
-const char *WIFI_OTA_PW PROGMEM = "TODO Fill in real wifi info";
+const char *WIFI_OTA_SSID PROGMEM = "PlexpodGuests";
+const char *WIFI_OTA_PW PROGMEM = "@plexpod";
 const char *OTA_BASE_URL PROGMEM = "https://discord.gr/";
 const char *OTA_CERTIFICATE PROGMEM = R"(
 -----BEGIN CERTIFICATE-----
