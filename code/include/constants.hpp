@@ -1,3 +1,5 @@
+#pragma once
+
 const int LED_B = 3;
 const int LED_S1 = 34;
 const int LED_I = 4;

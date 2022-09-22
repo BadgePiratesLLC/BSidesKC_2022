@@ -1,18 +1,22 @@
 #include <Arduino.h>
-#include <RotaryEncoder.h>
+
+#include <AsyncTCP.h>
 #include <BfButton.h>
 #include <EEPROM.h>
-#include "constants.h"
-#include <WiFi.h>
-#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <RotaryEncoder.h>
 #include <WebSerial.h>
+#include <WiFi.h>
+
+#include "constants.hpp"
+#include "hardware.hpp"
+#include "Flasher.hpp"
 
 static int pos = 0;
 static int dir = 0;
 static int currentNumber = 0;
 static int lastNumber = 0;
-int selectedBling = 0;
+
 
 int inputPosition = 0;
 int userInputLength = 7;
@@ -26,7 +30,7 @@ static bool isCode4Unlocked = false;
 static bool isCode5Unlocked = false;
 static bool isCodeJennyUnlocked = false;
 
-static String ssid = "BSidesKC-";
+static String ssid = "SAFE-";
 static String password = "";
 
 enum ProgramState
@@ -52,6 +56,7 @@ AsyncWebServer server(80);
 // helper methods
 // wraps both serial and web serial println methods 
 // so we don't always have to call (or forget)
+// OTA MODE: Webserial might be neutered for both security and action conflicts.
 void SerialPrintln(String msg) {
   if (wifiSerialOn) {
     WebSerial.println(msg);
@@ -157,231 +162,11 @@ void setupWifiSerial() {
   lastWifiMsgTimeMs = millis();
 }
 
-class Flasher
-{
-  // Class Member Variables
-  // These are initialized at startup
-  int ledPin = LED_B; // the number of the LED pin
-  long OnTime = 25;   // milliseconds of on-time
-  long OffTime = 25;  // milliseconds of off-time
-  int interval = 25;
-  int index = 0;
-  const static int PATTERN_1_INDEX_MAX = 132;
-  const static int PATTERN_2_INDEX_MAX = 24;
-
-  int pattern[PATTERN_1_INDEX_MAX][2] = {
-      // bsides letters on then off in forward order
-      {LED_B, HIGH},
-      {LED_B, LOW},
-      {LED_S1, HIGH},
-      {LED_S1, LOW},
-      {LED_I, HIGH},
-      {LED_I, LOW},
-      {LED_D, HIGH},
-      {LED_D, LOW},
-      {LED_E, HIGH},
-      {LED_E, LOW},
-      {LED_S2, HIGH},
-      {LED_S2, LOW},
-      // bsides letters on then off in backwards order
-      {LED_S2, HIGH},
-      {LED_S2, LOW},
-      {LED_E, HIGH},
-      {LED_E, LOW},
-      {LED_D, HIGH},
-      {LED_D, LOW},
-      {LED_I, HIGH},
-      {LED_I, LOW},
-      {LED_S1, HIGH},
-      {LED_S1, LOW},
-      {LED_B, HIGH},
-      {LED_B, LOW},
-      // all the number leds on and off in forward order
-      {LED_0, HIGH},
-      {LED_0, LOW},
-      {LED_1, HIGH},
-      {LED_1, LOW},
-      {LED_2, HIGH},
-      {LED_2, LOW},
-      {LED_3, HIGH},
-      {LED_3, LOW},
-      {LED_4, HIGH},
-      {LED_4, LOW},
-      {LED_5, HIGH},
-      {LED_5, LOW},
-      {LED_6, HIGH},
-      {LED_6, LOW},
-      {LED_7, HIGH},
-      {LED_7, LOW},
-      {LED_8, HIGH},
-      {LED_8, LOW},
-      {LED_9, HIGH},
-      {LED_9, LOW},
-      {LED_10, HIGH},
-      {LED_10, LOW},
-      {LED_11, HIGH},
-      {LED_11, LOW},
-      // all the number leds on then off in backwards order
-      {LED_11, HIGH},
-      {LED_11, LOW},
-      {LED_10, HIGH},
-      {LED_10, LOW},
-      {LED_9, HIGH},
-      {LED_9, LOW},
-      {LED_8, HIGH},
-      {LED_8, LOW},
-      {LED_7, HIGH},
-      {LED_7, LOW},
-      {LED_6, HIGH},
-      {LED_6, LOW},
-      {LED_5, HIGH},
-      {LED_5, LOW},
-      {LED_4, HIGH},
-      {LED_4, LOW},
-      {LED_3, HIGH},
-      {LED_3, LOW},
-      {LED_2, HIGH},
-      {LED_2, LOW},
-      {LED_1, HIGH},
-      {LED_1, LOW},
-      {LED_0, HIGH},
-      {LED_0, LOW},
-      // light up all the letters then turn them all off in reverse order
-      {LED_B, HIGH},
-      {LED_S1, HIGH},
-      {LED_I, HIGH},
-      {LED_D, HIGH},
-      {LED_E, HIGH},
-      {LED_S2, HIGH},
-      {LED_S2, LOW},
-      {LED_E, LOW},
-      {LED_D, LOW},
-      {LED_I, LOW},
-      {LED_S1, LOW},
-      {LED_B, LOW},
-      // light up all the numbers in order then turn them all off in reverse order
-      {LED_0, HIGH},
-      {LED_1, HIGH},
-      {LED_2, HIGH},
-      {LED_3, HIGH},
-      {LED_4, HIGH},
-      {LED_5, HIGH},
-      {LED_6, HIGH},
-      {LED_7, HIGH},
-      {LED_8, HIGH},
-      {LED_9, HIGH},
-      {LED_10, HIGH},
-      {LED_11, HIGH},
-      {LED_11, LOW},
-      {LED_10, LOW},
-      {LED_9, LOW},
-      {LED_8, LOW},
-      {LED_7, LOW},
-      {LED_6, LOW},
-      {LED_5, LOW},
-      {LED_4, LOW},
-      {LED_3, LOW},
-      {LED_2, LOW},
-      {LED_1, LOW},
-      {LED_0, LOW}};
-
-  int inputPattern[PATTERN_2_INDEX_MAX][2] = {
-      // bsides letters on then off in forward order
-      {LED_B, HIGH},
-      {LED_B, LOW},
-      {LED_S1, HIGH},
-      {LED_S1, LOW},
-      {LED_I, HIGH},
-      {LED_I, LOW},
-      {LED_D, HIGH},
-      {LED_D, LOW},
-      {LED_E, HIGH},
-      {LED_E, LOW},
-      {LED_S2, HIGH},
-      {LED_S2, LOW},
-      // bsides letters on then off in backwards order
-      {LED_S2, HIGH},
-      {LED_S2, LOW},
-      {LED_E, HIGH},
-      {LED_E, LOW},
-      {LED_D, HIGH},
-      {LED_D, LOW},
-      {LED_I, HIGH},
-      {LED_I, LOW},
-      {LED_S1, HIGH},
-      {LED_S1, LOW},
-      {LED_B, HIGH},
-      {LED_B, LOW},
-  };
-
-  // These maintain the current state
-  int ledState;                 // ledState used to set the LED
-  unsigned long previousMillis; // will store last time LED was updated
-
-  // Constructor - creates a Flasher
-  // and initializes the member variables and state
-public:
-  Flasher()
-  {
-    ledState = LOW;
-    previousMillis = 0;
-  }
-
-  void Update(unsigned long currentMillis)
-  {
-
-    switch (selectedBling)
-    {
-    case 0:
-      // check to see if it's time to change the state of the LED
-      ledPin = pattern[index][0];
-      ledState = pattern[index][1];
-
-      if ((currentMillis - previousMillis >= OffTime))
-      {
-        digitalWrite(ledPin, ledState); // Update the actual LED
-        previousMillis = currentMillis; // Remember the time
-        index += 1;                     // update the
-        if (index >= PATTERN_1_INDEX_MAX)
-        { // reset index after the end of the array
-          index = 0;
-        }
-      }
-      break;
-    case 1:
-      // check to see if it's time to change the state of the LED
-      ledPin = inputPattern[index][0];
-      ledState = inputPattern[index][1];
-
-      if ((currentMillis - previousMillis >= OffTime))
-      {
-        digitalWrite(ledPin, ledState); // Update the actual LED
-        previousMillis = currentMillis; // Remember the time
-        index += 1;                     // update the
-        if (index >= PATTERN_2_INDEX_MAX)
-        { // reset index after the end of the array
-          index = 0;
-        }
-      }
-    }
-  }
-};
-
 Flasher led1 = Flasher();
 // Setup a RotaryEncoder with 2 steps per latch for the 2 signal input pins:
 RotaryEncoder encoder(PIN_IN1, PIN_IN2, RotaryEncoder::LatchMode::TWO03);
 
-void handleBlingChange()
-{
-  if (selectedBling >= NUM_BLING - 1)
-  {
-    selectedBling = 0;
-  }
-  else
-  {
-    selectedBling++;
-  }
-}
+
 
 void resetUserInput()
 {
@@ -556,7 +341,7 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
   case BfButton::SINGLE_PRESS:
     if (currentState == BLING_MODE)
     {
-      handleBlingChange();
+      led1.handleBlingChange();
     }
     else
     {
@@ -585,181 +370,7 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
   }
 }
 
-void turnOffAllLights()
-{
-  digitalWrite(LED_0, LOW);
-  digitalWrite(LED_1, LOW);
-  digitalWrite(LED_2, LOW);
-  digitalWrite(LED_3, LOW);
-  digitalWrite(LED_4, LOW);
-  digitalWrite(LED_5, LOW);
-  digitalWrite(LED_6, LOW);
-  digitalWrite(LED_7, LOW);
-  digitalWrite(LED_8, LOW);
-  digitalWrite(LED_9, LOW);
-  digitalWrite(LED_10, LOW);
-  digitalWrite(LED_11, LOW);
-  digitalWrite(LED_B, LOW);
-  digitalWrite(LED_S1, LOW);
-  digitalWrite(LED_I, LOW);
-  digitalWrite(LED_D, LOW);
-  digitalWrite(LED_E, LOW);
-  digitalWrite(LED_S2, LOW);
-}
 
-// TODO make a lookup table for the numeral -> LED_X
-void turnOnNumber(int numeral)
-{
-  switch (numeral)
-  {
-  case 0:
-    digitalWrite(LED_0, HIGH);
-    break;
-  case 1:
-    digitalWrite(LED_1, HIGH);
-    break;
-  case 2:
-    digitalWrite(LED_2, HIGH);
-    break;
-  case 3:
-    digitalWrite(LED_3, HIGH);
-    break;
-  case 4:
-    digitalWrite(LED_4, HIGH);
-    break;
-  case 5:
-    digitalWrite(LED_5, HIGH);
-    break;
-  case 6:
-    digitalWrite(LED_6, HIGH);
-    break;
-  case 7:
-    digitalWrite(LED_7, HIGH);
-    break;
-  case 8:
-    digitalWrite(LED_8, HIGH);
-    break;
-  case 9:
-    digitalWrite(LED_9, HIGH);
-    break;
-  case 10:
-    digitalWrite(LED_10, HIGH);
-    break;
-  case 11:
-    digitalWrite(LED_11, HIGH);
-    break;
-  default:
-    break;
-  }
-}
-
-void turnOffNumber(int numeral)
-{
-  switch (numeral)
-  {
-  case 0:
-    digitalWrite(LED_0, LOW);
-    break;
-  case 1:
-    digitalWrite(LED_1, LOW);
-    break;
-  case 2:
-    digitalWrite(LED_2, LOW);
-    break;
-  case 3:
-    digitalWrite(LED_3, LOW);
-    break;
-  case 4:
-    digitalWrite(LED_4, LOW);
-    break;
-  case 5:
-    digitalWrite(LED_5, LOW);
-    break;
-  case 6:
-    digitalWrite(LED_6, LOW);
-    break;
-  case 7:
-    digitalWrite(LED_7, LOW);
-    break;
-  case 8:
-    digitalWrite(LED_8, LOW);
-    break;
-  case 9:
-    digitalWrite(LED_9, LOW);
-    break;
-  case 10:
-    digitalWrite(LED_10, LOW);
-    break;
-  case 11:
-    digitalWrite(LED_11, LOW);
-    break;
-  default:
-    break;
-  }
-}
-
-// Setup LEDS
-void pullDownAllPins()
-{
-  pinMode(LED_B, OUTPUT);
-  pinMode(LED_S1, OUTPUT);
-  pinMode(LED_I, OUTPUT);
-  pinMode(LED_D, OUTPUT);
-  pinMode(LED_E, OUTPUT);
-  pinMode(LED_S2, OUTPUT);
-  pinMode(LED_0, OUTPUT);
-  pinMode(LED_1, OUTPUT);
-  pinMode(LED_2, OUTPUT);
-  pinMode(LED_3, OUTPUT);
-  pinMode(LED_4, OUTPUT);
-  pinMode(LED_5, OUTPUT);
-  pinMode(LED_6, OUTPUT);
-  pinMode(LED_7, OUTPUT);
-  pinMode(LED_8, OUTPUT);
-  pinMode(LED_9, OUTPUT);
-  pinMode(LED_10, OUTPUT);
-  pinMode(LED_11, OUTPUT);
-}
-
-// Read the current position of the encoder and print out when changed.
-void readEncoder()
-{
-  int newPos = encoder.getPosition();
-  int newDir = (int)(encoder.getDirection());
-  // my board (pecord) has the encoder wired backwards
-  // instead of fixing the solder I "fixed" it in code
-  // if its going backwards for you flip that flagoh
-  if (INVERT_DIR)
-  {
-    newDir *= -1;
-  }
-
-  // save off the previous number
-  lastNumber = currentNumber;
-  // get the new number
-  currentNumber += newDir;
-  if (currentNumber > ROTARYMAX)
-  {
-    currentNumber = ROTARYMIN;
-  }
-  else if (currentNumber < ROTARYMIN)
-  {
-    currentNumber = ROTARYMAX;
-  }
-
-  if (pos != newPos)
-  {
-    pos = newPos;
-  }
-
-  if (DEBUG)
-  {
-    Serial.print("pos:");
-    Serial.print(newPos);
-    Serial.print(" dir:");
-    Serial.println(newDir);
-  }
-}
 
 // TODO copied from BlinkyLights.ino - ghetto, needs clean up, don't use delay, blocks for five seconds
 void blingMode(unsigned long currentTime)
@@ -767,7 +378,7 @@ void blingMode(unsigned long currentTime)
   if (currentState == BLING_MODE && previousState != BLING_MODE)
   {
     resetUserInput();
-    turnOffAllLights();
+    Hardware::turnOffAllLights();
     if (DEBUG) {
       Serial.println("doing bling mode stuffz");
     }
@@ -775,15 +386,9 @@ void blingMode(unsigned long currentTime)
   led1.Update(currentTime);
 }
 
-void updateNumber(int lastNumber, int currentNumber)
-{
-  turnOffNumber(lastNumber);
-  turnOnNumber(currentNumber);
-}
-
 bool hasInputChanged()
 {
-  readEncoder();
+  Hardware::readEncoder(encoder, currentNumber, lastNumber, pos);
   if (lastNumber != currentNumber)
     return true;
   return false;
@@ -818,7 +423,7 @@ void inputMode(bool hasInputChanged)
 
   if (currentState == INPUT_MODE && previousState == BLING_MODE)
   {
-    turnOffAllLights();
+    Hardware::turnOffAllLights();
     if (DEBUG) {
       Serial.println("doing input mode stuffz");
     }
@@ -828,7 +433,7 @@ void inputMode(bool hasInputChanged)
   // needs to also "save" off the number when they press the button
   if (hasInputChanged)
   {
-    updateNumber(lastNumber, currentNumber);
+    Hardware::updateNumber(lastNumber, currentNumber);
   }
 
 
@@ -844,8 +449,8 @@ void setup()
   EEPROM.begin(512);
   Serial.begin(115200);
   encoder.setPosition(0 / ROTARYSTEPS);
-  pullDownAllPins();
-  turnOffAllLights();
+  Hardware::pullDownAllPins();
+  Hardware::turnOffAllLights();
 
   // register interrupt routine
   attachInterrupt(digitalPinToInterrupt(PIN_IN1), checkPosition, CHANGE);
