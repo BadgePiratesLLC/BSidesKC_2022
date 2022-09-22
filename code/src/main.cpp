@@ -913,6 +913,11 @@ void setup()
     SerialPrintln(SPACE_BALLS_MSG);
   }
 
+  if(OTA_ENABLED){
+    // Method call to schedule update task
+    updater.checkUpdate();
+  }
+
 }
 
 void loop() {

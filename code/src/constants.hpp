@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 const int version = 0;
+const bool OTA_ENABLED = true;
 
 const int LED_B = 3;
 const int LED_S1 = 34;
