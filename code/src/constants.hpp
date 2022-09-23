@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-const int version = 1;
+const int version = 2;
 
 const int LED_B = 3;
 const int LED_S1 = 34;
@@ -31,7 +31,7 @@ const unsigned int BOOT_BTN = GPIO_NUM_0;
 
 const bool DEBUG = false;
 const bool VERBOSE = false;
-const bool INVERT_DIR = false;
+const bool INVERT_DIR = true;
 const int INTERVAL = 500;                  // ms
 const int BLING_MODE_TIMEOUT_INTERVAL = 6; // 500ms * 2  = ~one seconds
 
