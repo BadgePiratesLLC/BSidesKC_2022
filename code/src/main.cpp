@@ -169,11 +169,40 @@ void sleep() {
   esp_light_sleep_start();
 }
 
+void turnOffAllLights()
+{
+  
+  for (int i = 0; i < 18; i++) {
+    digitalWrite(allLeds[i], LOW);
+  }
+}
+
+void turnOnAllLights()
+{
+  for (int i = 0; i < 18; i++) {
+    digitalWrite(allLeds[i], HIGH);
+  }
+}
+
+
 void confirmationFlash() {
   turnOffAllLights();
+  delay(50);
   turnOnAllLights();
+  delay(50);
   turnOffAllLights();
+  delay(50);
   turnOnAllLights();
+  delay(50);
+  turnOffAllLights();
+  turnOffAllLights();
+  delay(50);
+  turnOnAllLights();
+  delay(50);
+  turnOffAllLights();
+  delay(50);
+  turnOnAllLights();
+  delay(50);
   turnOffAllLights();
 }
 
@@ -187,7 +216,7 @@ class Flasher
   int interval = 25;
   int index = 0;
   const static int PATTERN_0_INDEX_MAX = 132;
-  const static int PATTERN_2_INDEX_MAX = 24;
+  const static int PATTERN_1_INDEX_MAX = 24;
 
   int inputPattern0[PATTERN_0_INDEX_MAX][2] = {
       // bsides letters on then off in forward order
@@ -305,7 +334,7 @@ class Flasher
       {LED_1, LOW},
       {LED_0, LOW}};
 
-  int inputPattern[PATTERN_2_INDEX_MAX][2] = {
+  int inputPattern1[PATTERN_1_INDEX_MAX][2] = {
       // bsides letters on then off in forward order
       {LED_B, HIGH},
       {LED_B, LOW},
@@ -354,15 +383,15 @@ public:
     {
     case 0:
       // check to see if it's time to change the state of the LED
-      ledPin = pattern[index][0];
-      ledState = pattern[index][1];
+      ledPin = inputPattern0[index][0];
+      ledState = inputPattern0[index][1];
 
       if ((currentMillis - previousMillis >= OffTime))
       {
         digitalWrite(ledPin, ledState); // Update the actual LED
         previousMillis = currentMillis; // Remember the time
         index += 1;                     // update the
-        if (index >= PATTERN_1_INDEX_MAX)
+        if (index >= PATTERN_0_INDEX_MAX)
         { // reset index after the end of the array
           index = 0;
           sleep();
@@ -371,15 +400,15 @@ public:
       break;
     case 1:
       // check to see if it's time to change the state of the LED
-      ledPin = inputPattern[index][0];
-      ledState = inputPattern[index][1];
+      ledPin = inputPattern1[index][0];
+      ledState = inputPattern1[index][1];
 
       if ((currentMillis - previousMillis >= OffTime))
       {
         digitalWrite(ledPin, ledState); // Update the actual LED
         previousMillis = currentMillis; // Remember the time
         index += 1;                     // update the
-        if (index >= PATTERN_2_INDEX_MAX)
+        if (index >= PATTERN_1_INDEX_MAX)
         { // reset index after the end of the array
           index = 0;
           sleep();
@@ -707,21 +736,6 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
   case BfButton::LONG_PRESS:
     Serial.println("Long push");
     break;
-  }
-}
-
-void turnOffAllLights()
-{
-  
-  for (int i = 0; i < 18; i++) {
-    digitalWrite(allLeds[i], LOW);
-  }
-}
-
-void turnOnAllLights()
-{
-  for (int i = 0; i < 18; i++) {
-    digitalWrite(allLeds[i], HIGH);
   }
 }
 

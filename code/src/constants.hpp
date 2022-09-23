@@ -24,8 +24,6 @@ const int LED_9 = 37;
 const int LED_10 = 12;
 const int LED_11 = 17;
 
-const int[18] allLeds = {LED_0, LED_1,LED_2,LED_3,LED_4,LED_5,LED_6,LED_7,LED_8,LED_9,LED_10,LED_11,LED_B,LED_S1,LED_I,LED_D,LED_E,LED_S2};
-
 // in case patrick's rotary switch breaks
 // const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
 const unsigned int ROTARY_SWITCH = GPIO_NUM_7;
@@ -64,6 +62,8 @@ const int CODE_4[7] = {1, 3, 3, 7, 0, 0, 0}; // leet
 const int CODE_5[7] = {6, 6, 6, 0, 0, 0, 0}; // mark of the devil
 const int CODE_RESET[7] = {1, 1, 1, 1, 1, 1}; // reset
 const int CODE_JENNY[7] = {8, 6, 7, 5, 3, 0, 9};
+
+const int allLeds[18] = {LED_0, LED_1,LED_2,LED_3,LED_4,LED_5,LED_6,LED_7,LED_8,LED_9,LED_10,LED_11,LED_B,LED_S1,LED_I,LED_D,LED_E,LED_S2};
 
 const String HELP_MSG = "Thank you for coming to BSidesKC and hacking on the badge. ";
 const String JENNY_HELP_MSG = "If the wifi isn't working try calling jenny.";
