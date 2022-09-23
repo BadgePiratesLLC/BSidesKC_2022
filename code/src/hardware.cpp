@@ -154,3 +154,9 @@ void confirmationFlash() {
   delay(50);
   turnOffAllLights();
 }
+
+void errorFlash(){
+    turnOnAllLights();
+    delay(2000);
+    turnOffAllLights();
+}

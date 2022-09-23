@@ -497,17 +497,19 @@ void checkIsValidCode()
     EEPROM.writeString(WIFI_PASSWORD_ADDR, "");
     EEPROM.commit();
     confirmationFlash();
+    resetUserInput();
   }
 
-  if (isCode0)
+  else if (isCode0)
   {
     isCode0Unlocked = true;
     EEPROM.writeBool(CODE_0_ADDR, isCode0Unlocked);
     Serial.println("CODE 0 MATCHES");
     confirmationFlash();
+    resetUserInput();
   }
 
-  if (isCodeJenny)
+  else if (isCodeJenny)
   {
     isCodeJennyUnlocked = true;
     EEPROM.writeBool(CODE_JENNY_ADDR, isCodeJennyUnlocked);
@@ -516,38 +518,49 @@ void checkIsValidCode()
     confirmationFlash();
   }
 
-  if(isCode1){
+  else if(isCode1){
     isCode1Unlocked = true;
     EEPROM.writeBool(CODE_1_ADDR, isCode1Unlocked);
     Serial.print("CODE 1 MATCHES:");
+    confirmationFlash();
+    resetUserInput();
   }
   
-  if(isCode2){
+  else if(isCode2){
     isCode2Unlocked = true;
     EEPROM.writeBool(CODE_2_ADDR, isCode2Unlocked);
     Serial.println("CODE 2 MATCHES");
     confirmationFlash();
+    resetUserInput();
   }
 
-  if(isCode3){
+  else if(isCode3){
     isCode3Unlocked = true;
     EEPROM.writeBool(CODE_3_ADDR, isCode3Unlocked);
     Serial.println("CODE 3 MATCHES");
     confirmationFlash();
+    resetUserInput();
   }
 
-  if(isCode4){
+  else if(isCode4){
     isCode4Unlocked = true;
     EEPROM.writeBool(CODE_4_ADDR, isCode4Unlocked);
     Serial.println("CODE 4 MATCHES");
     confirmationFlash();
+    resetUserInput();
   }
 
-  if(isCode5){
+  else if(isCode5){
     isCode5Unlocked = true;
     EEPROM.writeBool(CODE_5_ADDR, isCode5Unlocked);
     Serial.println("CODE 5 MATCHES");
     confirmationFlash();
+  } else {
+    Serial.println("INVALID CODE");
+    if(inputPosition>=6){
+      errorFlash();
+      resetUserInput();
+    }
   }
 
   if (isCode0 || isCode1 || isCode2 || isCode3 || isCode4 || isCode5 || isCodeJennyUnlocked) {
