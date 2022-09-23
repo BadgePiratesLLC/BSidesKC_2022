@@ -4,7 +4,7 @@
 // I hate doing this but I don't want to waste an hour fixing it.
 const char *WIFI_OTA_SSID PROGMEM = "PlexpodGuests";
 const char *WIFI_OTA_PW PROGMEM = "@plexpod";
-const char *OTA_BASE_URL PROGMEM = "http://discord.gr/";
+const char *OTA_BASE_URL PROGMEM = "http://discord.gr/"; // Just goes to github pages with a version and a binary.
 
 // Checks whether or not our wifi can be seen
 bool OTA::isWifiAvailable()
