@@ -25,8 +25,8 @@ const int LED_10 = 12;
 const int LED_11 = 17;
 
 // in case patrick's rotary switch breaks
-const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
-//const unsigned int ROTARY_SWITCH = GPIO_NUM_7;
+// const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
+const unsigned int ROTARY_SWITCH = GPIO_NUM_7;
 const unsigned int BOOT_BTN = GPIO_NUM_0;
 
 const bool DEBUG = false;
