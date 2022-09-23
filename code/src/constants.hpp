@@ -1,3 +1,9 @@
+#pragma once
+
+#include <Arduino.h>
+
+const int version = 1;
+
 const int LED_B = 3;
 const int LED_S1 = 34;
 const int LED_I = 4;
@@ -19,11 +25,12 @@ const int LED_10 = 12;
 const int LED_11 = 17;
 
 // in case patrick's rotary switch breaks
-//const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
-const unsigned int ROTARY_SWITCH = GPIO_NUM_7;
+const unsigned int ROTARY_SWITCH = GPIO_NUM_0;
+//const unsigned int ROTARY_SWITCH = GPIO_NUM_7;
+const unsigned int BOOT_BTN = GPIO_NUM_0;
 
 const bool DEBUG = false;
-const bool VERBOSE = true;
+const bool VERBOSE = false;
 const bool INVERT_DIR = false;
 const int INTERVAL = 500;                  // ms
 const int BLING_MODE_TIMEOUT_INTERVAL = 6; // 500ms * 2  = ~one seconds
@@ -42,6 +49,7 @@ const int CODE_3_ADDR = 3;
 const int CODE_4_ADDR = 4;
 const int CODE_5_ADDR = 5;
 const int CODE_JENNY_ADDR = 6;
+
 // leave space because we are saving strings? I dunno how it works
 const int WIFI_SSID_ADDR = 50;
 const int WIFI_PASSWORD_ADDR = 30;
