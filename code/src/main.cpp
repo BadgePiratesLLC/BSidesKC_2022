@@ -397,6 +397,97 @@ void handleBlingChange()
   }
 }
 
+// TODO make a lookup table for the numeral -> LED_X
+void turnOnNumber(int numeral)
+{
+  switch (numeral)
+  {
+  case 0:
+    digitalWrite(LED_0, HIGH);
+    break;
+  case 1:
+    digitalWrite(LED_1, HIGH);
+    break;
+  case 2:
+    digitalWrite(LED_2, HIGH);
+    break;
+  case 3:
+    digitalWrite(LED_3, HIGH);
+    break;
+  case 4:
+    digitalWrite(LED_4, HIGH);
+    break;
+  case 5:
+    digitalWrite(LED_5, HIGH);
+    break;
+  case 6:
+    digitalWrite(LED_6, HIGH);
+    break;
+  case 7:
+    digitalWrite(LED_7, HIGH);
+    break;
+  case 8:
+    digitalWrite(LED_8, HIGH);
+    break;
+  case 9:
+    digitalWrite(LED_9, HIGH);
+    break;
+  case 10:
+    digitalWrite(LED_10, HIGH);
+    break;
+  case 11:
+    digitalWrite(LED_11, HIGH);
+    break;
+  default:
+    break;
+  }
+}
+
+void turnOffNumber(int numeral)
+{
+  switch (numeral)
+  {
+  case 0:
+    digitalWrite(LED_0, LOW);
+    break;
+  case 1:
+    digitalWrite(LED_1, LOW);
+    break;
+  case 2:
+    digitalWrite(LED_2, LOW);
+    break;
+  case 3:
+    digitalWrite(LED_3, LOW);
+    break;
+  case 4:
+    digitalWrite(LED_4, LOW);
+    break;
+  case 5:
+    digitalWrite(LED_5, LOW);
+    break;
+  case 6:
+    digitalWrite(LED_6, LOW);
+    break;
+  case 7:
+    digitalWrite(LED_7, LOW);
+    break;
+  case 8:
+    digitalWrite(LED_8, LOW);
+    break;
+  case 9:
+    digitalWrite(LED_9, LOW);
+    break;
+  case 10:
+    digitalWrite(LED_10, LOW);
+    break;
+  case 11:
+    digitalWrite(LED_11, LOW);
+    break;
+  default:
+    break;
+  }
+}
+
 void resetUserInput()
 {
   inputPosition = 0;
@@ -555,6 +646,11 @@ void checkIsValidCode()
 
 void logCode()
 {
+  // Do confirmation animation
+  turnOffNumber(currentNumber);
+  delay(50);
+  turnOnNumber(currentNumber);
+
   SerialPrint("User Input: ");
   for (int i = 0; i < userInputLength; i++)
   {
@@ -629,97 +725,6 @@ void bootpressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
     Serial.println("Entering OTA Update mode");
     turnOffAllLights();
     updater.checkOTASync();
-    break;
-  }
-}
-
-// TODO make a lookup table for the numeral -> LED_X
-void turnOnNumber(int numeral)
-{
-  switch (numeral)
-  {
-  case 0:
-    digitalWrite(LED_0, HIGH);
-    break;
-  case 1:
-    digitalWrite(LED_1, HIGH);
-    break;
-  case 2:
-    digitalWrite(LED_2, HIGH);
-    break;
-  case 3:
-    digitalWrite(LED_3, HIGH);
-    break;
-  case 4:
-    digitalWrite(LED_4, HIGH);
-    break;
-  case 5:
-    digitalWrite(LED_5, HIGH);
-    break;
-  case 6:
-    digitalWrite(LED_6, HIGH);
-    break;
-  case 7:
-    digitalWrite(LED_7, HIGH);
-    break;
-  case 8:
-    digitalWrite(LED_8, HIGH);
-    break;
-  case 9:
-    digitalWrite(LED_9, HIGH);
-    break;
-  case 10:
-    digitalWrite(LED_10, HIGH);
-    break;
-  case 11:
-    digitalWrite(LED_11, HIGH);
-    break;
-  default:
-    break;
-  }
-}
-
-void turnOffNumber(int numeral)
-{
-  switch (numeral)
-  {
-  case 0:
-    digitalWrite(LED_0, LOW);
-    break;
-  case 1:
-    digitalWrite(LED_1, LOW);
-    break;
-  case 2:
-    digitalWrite(LED_2, LOW);
-    break;
-  case 3:
-    digitalWrite(LED_3, LOW);
-    break;
-  case 4:
-    digitalWrite(LED_4, LOW);
-    break;
-  case 5:
-    digitalWrite(LED_5, LOW);
-    break;
-  case 6:
-    digitalWrite(LED_6, LOW);
-    break;
-  case 7:
-    digitalWrite(LED_7, LOW);
-    break;
-  case 8:
-    digitalWrite(LED_8, LOW);
-    break;
-  case 9:
-    digitalWrite(LED_9, LOW);
-    break;
-  case 10:
-    digitalWrite(LED_10, LOW);
-    break;
-  case 11:
-    digitalWrite(LED_11, LOW);
-    break;
-  default:
     break;
   }
 }
