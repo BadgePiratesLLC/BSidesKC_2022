@@ -169,6 +169,14 @@ void sleep() {
   esp_light_sleep_start();
 }
 
+void confirmationFlash() {
+  turnOffAllLights();
+  turnOnAllLights();
+  turnOffAllLights();
+  turnOnAllLights();
+  turnOffAllLights();
+}
+
 class Flasher
 {
   // Class Member Variables
@@ -178,10 +186,10 @@ class Flasher
   long OffTime = 25;  // milliseconds of off-time
   int interval = 25;
   int index = 0;
-  const static int PATTERN_1_INDEX_MAX = 132;
+  const static int PATTERN_0_INDEX_MAX = 132;
   const static int PATTERN_2_INDEX_MAX = 24;
 
-  int pattern[PATTERN_1_INDEX_MAX][2] = {
+  int inputPattern0[PATTERN_0_INDEX_MAX][2] = {
       // bsides letters on then off in forward order
       {LED_B, HIGH},
       {LED_B, LOW},
@@ -591,6 +599,7 @@ void checkIsValidCode()
     EEPROM.writeString(WIFI_SSID_ADDR, "");
     EEPROM.writeString(WIFI_PASSWORD_ADDR, "");
     EEPROM.commit();
+    confirmationFlash();
   }
 
   if (isCode0)
@@ -598,6 +607,7 @@ void checkIsValidCode()
     isCode0Unlocked = true;
     EEPROM.writeBool(CODE_0_ADDR, isCode0Unlocked);
     Serial.println("CODE 0 MATCHES");
+    confirmationFlash();
   }
 
   if (isCodeJenny)
@@ -606,6 +616,7 @@ void checkIsValidCode()
     EEPROM.writeBool(CODE_JENNY_ADDR, isCodeJennyUnlocked);
     Serial.println("CODE JENNY TYPED IN");
     setupWifiSerial();
+    confirmationFlash();
   }
 
   if(isCode1){
@@ -618,24 +629,28 @@ void checkIsValidCode()
     isCode2Unlocked = true;
     EEPROM.writeBool(CODE_2_ADDR, isCode2Unlocked);
     Serial.println("CODE 2 MATCHES");
+    confirmationFlash();
   }
 
   if(isCode3){
     isCode3Unlocked = true;
     EEPROM.writeBool(CODE_3_ADDR, isCode3Unlocked);
     Serial.println("CODE 3 MATCHES");
+    confirmationFlash();
   }
 
   if(isCode4){
     isCode4Unlocked = true;
     EEPROM.writeBool(CODE_4_ADDR, isCode4Unlocked);
     Serial.println("CODE 4 MATCHES");
+    confirmationFlash();
   }
 
   if(isCode5){
     isCode5Unlocked = true;
     EEPROM.writeBool(CODE_5_ADDR, isCode5Unlocked);
     Serial.println("CODE 5 MATCHES");
+    confirmationFlash();
   }
 
   if (isCode0 || isCode1 || isCode2 || isCode3 || isCode4 || isCode5 || isCodeJennyUnlocked) {
@@ -697,24 +712,17 @@ void pressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
 
 void turnOffAllLights()
 {
-  digitalWrite(LED_0, LOW);
-  digitalWrite(LED_1, LOW);
-  digitalWrite(LED_2, LOW);
-  digitalWrite(LED_3, LOW);
-  digitalWrite(LED_4, LOW);
-  digitalWrite(LED_5, LOW);
-  digitalWrite(LED_6, LOW);
-  digitalWrite(LED_7, LOW);
-  digitalWrite(LED_8, LOW);
-  digitalWrite(LED_9, LOW);
-  digitalWrite(LED_10, LOW);
-  digitalWrite(LED_11, LOW);
-  digitalWrite(LED_B, LOW);
-  digitalWrite(LED_S1, LOW);
-  digitalWrite(LED_I, LOW);
-  digitalWrite(LED_D, LOW);
-  digitalWrite(LED_E, LOW);
-  digitalWrite(LED_S2, LOW);
+  
+  for (int i = 0; i < 18; i++) {
+    digitalWrite(allLeds[i], LOW);
+  }
+}
+
+void turnOnAllLights()
+{
+  for (int i = 0; i < 18; i++) {
+    digitalWrite(allLeds[i], HIGH);
+  }
 }
 
 void bootpressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
