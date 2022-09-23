@@ -164,6 +164,11 @@ void setupWifiSerial() {
   lastWifiMsgTimeMs = millis();
 }
 
+void sleep() {
+  esp_sleep_enable_timer_wakeup(1000000); // one second in microseconds
+  esp_light_sleep_start();
+}
+
 class Flasher
 {
   // Class Member Variables
@@ -352,6 +357,7 @@ public:
         if (index >= PATTERN_1_INDEX_MAX)
         { // reset index after the end of the array
           index = 0;
+          sleep();
         }
       }
       break;
@@ -368,6 +374,7 @@ public:
         if (index >= PATTERN_2_INDEX_MAX)
         { // reset index after the end of the array
           index = 0;
+          sleep();
         }
       }
     }
