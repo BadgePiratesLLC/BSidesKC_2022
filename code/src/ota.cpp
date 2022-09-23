@@ -202,5 +202,10 @@ void OTA::checkOTASync()
             Serial.println(httpCode);
             WiFi.disconnect();
         }
+        digitalWrite(LED_1, HIGH);
+        digitalWrite(LED_2, HIGH);
+        digitalWrite(LED_3, HIGH);
+        delay(10000);
+        ESP.restart();
     }
 }
