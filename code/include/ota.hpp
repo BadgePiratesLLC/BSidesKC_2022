@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <HTTPClient.h>
-#include <HttpsOTAUpdate.h>
+#include <ESP32httpUpdate.h>
 #include <WiFi.h>
 
 #include "constants.hpp"
@@ -14,9 +14,6 @@ class OTA{
         
     public:
 
-        static void updateTask(void *parameter);
         static bool isWifiAvailable();
-        
-        void checkUpdate();
-        void stopUpdate();
+        void checkOTASync();
 };

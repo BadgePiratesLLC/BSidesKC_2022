@@ -51,6 +51,7 @@ bool hasInputChangedDuringInterval = false;
 bool wifiSerialOn = false;
 
 BfButton btn(BfButton::STANDALONE_DIGITAL, ROTARY_SWITCH, true, LOW);
+BfButton bootbtn(BfButton::STANDALONE_DIGITAL, BOOT_BTN, true, LOW);
 
 AsyncWebServer server(80);
 
@@ -613,6 +614,18 @@ void turnOffAllLights()
   digitalWrite(LED_S2, LOW);
 }
 
+void bootpressHandler(BfButton *btn, BfButton::press_pattern_t pattern)
+{
+  switch (pattern)
+  {
+  case BfButton::DOUBLE_PRESS:
+    Serial.println("Entering OTA Update mode");
+    turnOffAllLights();
+    updater.checkOTASync();
+    break;
+  }
+}
+
 // TODO make a lookup table for the numeral -> LED_X
 void turnOnNumber(int numeral)
 {
@@ -758,7 +771,7 @@ void readEncoder()
     pos = newPos;
   }
 
-  if (DEBUG)
+  if (DEBUG && VERBOSE)
   {
     Serial.print("pos:");
     Serial.print(newPos);
@@ -862,6 +875,9 @@ void setup()
   btn.onPress(pressHandler)
       .onDoublePress(pressHandler)     // default timeout
       .onPressFor(pressHandler, 1000); // custom timeout for 1 second
+  
+  bootbtn.onDoublePress(bootpressHandler);     // default timeout
+      
 
   isCode0Unlocked = EEPROM.readBool(CODE_0_ADDR);  
   isCode1Unlocked = EEPROM.readBool(CODE_1_ADDR);
@@ -913,16 +929,12 @@ void setup()
     SerialPrintln(SPACE_BALLS_MSG);
   }
 
-  if(OTA_ENABLED){
-    // Method call to schedule update task
-    updater.checkUpdate();
-  }
-
 }
 
 void loop() {
   encoder.tick();
   btn.read();
+  bootbtn.read();
 
   previousState = currentState;
   currentTime = millis();
