@@ -521,7 +521,7 @@ void checkIsValidCode()
   else if(isCode1){
     isCode1Unlocked = true;
     EEPROM.writeBool(CODE_1_ADDR, isCode1Unlocked);
-    Serial.print("CODE 1 MATCHES:");
+    Serial.print("CODE 1 MATCHES");
     confirmationFlash();
     resetUserInput();
   }
