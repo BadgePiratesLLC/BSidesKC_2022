@@ -437,13 +437,6 @@ void checkIsValidCode()
   }
 
   i = 0;
-  while (i < userInputLength && isCodeJenny)
-  {
-    isCodeJenny = userInput[i] == CODE_JENNY[i];
-    i++;
-  }
-
-  i = 0;
   while (i < userInputLength && isCode1)
   {
     isCode1 = userInput[i] == CODE_1[i];
